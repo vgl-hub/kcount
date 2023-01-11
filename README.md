@@ -2,7 +2,7 @@
 
 A kmer counting tool
 
-**kcount** is a single fast kmer counting tool. It generates the kmer histogram and optionally a lexicographically ordered kmer table.
+**kcount** is a single fast kmer counting tool. It generates the kmer histogram.
 
 ## Installation
 
