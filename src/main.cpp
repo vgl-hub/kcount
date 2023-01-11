@@ -19,7 +19,6 @@
 #include "stream-obj.h"
 
 #include "input.h"
-#include "ktree.h"
 #include "main.h"
 
 std::string version = "0.0.1";

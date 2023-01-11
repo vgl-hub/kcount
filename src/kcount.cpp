@@ -16,11 +16,18 @@
 #include "kcount.h"
 
 inline uint64_t Kcount::hash(uint8_t *kmer) {
-    uint64_t result = 0;
-    for(uint8_t c = 0; c<k; c++)
-        result += *kmer++ * pows[c];
     
-    return result;
+    uint64_t fw = 0, rv = 0;
+    
+    for(uint8_t c = 0; c<k; ++c)
+        fw += *kmer++ * pows[c];
+    
+    --kmer;
+    
+    for(uint8_t c = 0; c<k; ++c)
+        rv += (3-(*kmer--)) * pows[c];
+    
+    return fw < rv ? fw : rv;
 }
 
 bool Kcount::countBuff(buf64* buf, phmap::flat_hash_map<uint64_t, uint64_t>& map) {
@@ -30,7 +37,7 @@ bool Kcount::countBuff(buf64* buf, phmap::flat_hash_map<uint64_t, uint64_t>& map
     
     uint64_t len = buf->pos;
     
-    for (uint64_t c = 0; c<len; c++)
+    for (uint64_t c = 0; c<len; ++c)
         ++map[buf->seq[c]];
     
     return true;
@@ -39,17 +46,44 @@ bool Kcount::countBuff(buf64* buf, phmap::flat_hash_map<uint64_t, uint64_t>& map
 
 bool Kcount::countUnique(phmap::flat_hash_map<uint64_t, uint64_t>& map) {
     
-    uint64_t KmersUnique = std::distance(map.begin(), map.end());
+    uint64_t kmersUnique = 0, kmersDistinct = 0;
     
-    std::unique_lock<std::mutex> lck (mtx, std::defer_lock);
+    phmap::flat_hash_map<uint64_t, uint64_t> hist;
     
-    lck.lock();
+    for (auto pair : map) {
+        
+        if (pair.second == 1)
+            ++kmersUnique;
+        
+        ++kmersDistinct;
+        
+        ++hist[pair.second];
+        
+    }
     
-    totKmersUnique += KmersUnique;
+    std::unique_lock<std::mutex> lck(mtx);
     
-    lck.unlock();
+    totKmersUnique += kmersUnique;
+    
+    totKmersDistinct += kmersDistinct;
+    
+    for (auto pair : hist) {
+        
+        histogram1[pair.first] += pair.second;
+        
+    }
     
     return true;
+
+}
+
+void Kcount::printHist() {
+    
+    std::vector<std::pair<uint64_t, uint64_t>> table(histogram1.begin(), histogram1.end());
+    std::sort(table.begin(), table.end());
+    
+    for (auto pair : table)
+        std::cout<<pair.first<<"\t"<<pair.second<<"\n";
 
 }
 
@@ -64,15 +98,15 @@ void Kcount::count(std::vector<InSegment*>* segments) {
         if (segment->getSegmentLen()<k)
             continue;
         
-        uint64_t len = segment->getSegmentLen()-k+1;
+        uint64_t len = segment->getSegmentLen(), kcount = len-k+1;
         
-        totKmers += len;
+        totKmers += kcount;
         
         unsigned char* first = (unsigned char*)segment->getInSequencePtr()->c_str();
         
         uint8_t* str = new uint8_t[segment->getSegmentLen()];
         
-        for (uint64_t i = 0; i < len+k-1; i++){
+        for (uint64_t i = 0; i<len; ++i){
             
             str[i] = ctoi[*(first+i)];
             
@@ -82,7 +116,7 @@ void Kcount::count(std::vector<InSegment*>* segments) {
         buf64* b;
         uint64_t* bufNew;
         
-        for (uint64_t c = 0; c<len; ++c){
+        for (uint64_t c = 0; c<kcount; ++c){
             
             value = hash(str+c);
             
@@ -115,7 +149,7 @@ void Kcount::count(std::vector<InSegment*>* segments) {
     
     lg.verbose("Populating maps");
     
-    for(uint16_t m = 0; m<mapCount; m++)
+    for(uint16_t m = 0; m<mapCount; ++m)
         threadPool.queueJob([=]{ return countBuff(&buf[m], map[m]); });
     
     jobWait(threadPool);
@@ -124,14 +158,19 @@ void Kcount::count(std::vector<InSegment*>* segments) {
     
     lg.verbose("Counting unique kmers");
     
-    for(uint16_t m = 0; m<mapCount; m++)
+    for(uint16_t m = 0; m<mapCount; ++m)
         threadPool.queueJob([=]{ return countUnique(map[m]); });
     
     jobWait(threadPool);
     
     if(verbose_flag) {std::cerr<<"\n\n";};
     
-    std::cout<<"Total kmers: "<<totKmers<<std::endl;
-    std::cout<<"Unique kmers: "<<totKmersUnique<<std::endl;
+    std::cout<<"Total: "<<totKmers<<"\n";
+    std::cout<<"Unique: "<<totKmersUnique<<"\n";
+    std::cout<<"Distinct: "<<totKmersDistinct<<"\n";
+    uint64_t missing = pow(4,k)-totKmersDistinct;
+    std::cout<<"Missing: "<<missing<<"\n\n";
+    
+    printHist();
     
 }

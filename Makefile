@@ -4,7 +4,7 @@ WARNINGS = -Wall -Wextra
 
 CXXFLAGS = -g -std=gnu++14 -O3 $(INCLUDE_DIR) $(WARNINGS)
 
-TARGET = kreeq
+TARGET = kcount
 BUILD = build/bin
 SOURCE = src
 INCLUDE = include
