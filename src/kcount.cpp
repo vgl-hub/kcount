@@ -139,6 +139,8 @@ void Kcount::hashSequences(Sequences* readBatch) {
     
     buf64* buf = new buf64[mapCount];
     
+    uint64_t kmers = 0;
+    
     for (Sequence* sequence : readBatch->sequences) {
         
         uint64_t len = sequence->sequence->size(), kcount = len-k+1;
@@ -146,7 +148,7 @@ void Kcount::hashSequences(Sequences* readBatch) {
         if (len<k)
             continue;
         
-        totKmers += kcount;
+        kmers += kcount;
         
         unsigned char* first = (unsigned char*)sequence->sequence->c_str();
         
@@ -194,6 +196,8 @@ void Kcount::hashSequences(Sequences* readBatch) {
     }
     
     std::unique_lock<std::mutex> lck(mtx);
+    
+    totKmers += kmers;
     
     buffers.push_back(buf);
     
