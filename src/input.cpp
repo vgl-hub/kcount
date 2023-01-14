@@ -162,6 +162,8 @@ void Input::read(InSequences& inSequences) {
                     lg.verbose("Processing batch N: " + std::to_string(readBatch->batchN));
 
                     kcount.appendReads(readBatch);
+                    
+                    jobWait(threadPool);
 
                     break;
 
@@ -172,8 +174,6 @@ void Input::read(InSequences& inSequences) {
         }
         
     }
-    
-    jobWait(threadPool);
         
     kcount.count();
 	

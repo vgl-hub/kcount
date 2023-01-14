@@ -17,10 +17,6 @@
 
 bool Kcount::traverseInReads(Sequences* readBatch) { // traverse the read
 
-    Log threadLog;
-    
-    threadLog.setId(readBatch->batchN);
-
     hashSequences(readBatch);
     
     delete readBatch;
@@ -137,6 +133,10 @@ void Kcount::printHist() {
 
 void Kcount::hashSequences(Sequences* readBatch) {
     
+    Log threadLog;
+    
+    threadLog.setId(readBatch->batchN);
+    
     buf64* buf = new buf64[mapCount];
     
     uint64_t kmers = 0;
@@ -191,7 +191,7 @@ void Kcount::hashSequences(Sequences* readBatch) {
         
         delete[] str;
         
-        lg.verbose("Processed sequence: " + sequence->header);
+        threadLog.add("Processed sequence: " + sequence->header);
         
     }
     
@@ -200,6 +200,8 @@ void Kcount::hashSequences(Sequences* readBatch) {
     totKmers += kmers;
     
     buffers.push_back(buf);
+    
+    logs.push_back(threadLog);
     
 }
 
