@@ -136,7 +136,7 @@ void Input::read(InSequences& inSequences) {
 
                         getline(*stream, newLine);
                         
-                        stream->ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                        ignore(*stream, '\n');
 
                         readBatch->sequences.push_back(new Sequence {seqHeader, seqComment, inSequence});
                         seqPos++;
