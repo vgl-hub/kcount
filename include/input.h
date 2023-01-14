@@ -1,7 +1,7 @@
 #ifndef INPUT_H
 #define INPUT_H
 
-struct UserInputKreeq : UserInput {
+struct UserInputKcount : UserInput {
 
     unsigned short int kmerLen = 21;
 
@@ -9,7 +9,7 @@ struct UserInputKreeq : UserInput {
 
 class Input {
     
-    UserInputKreeq userInput;
+    UserInputKcount userInput;
     
     //intermediates
     std::string h;
@@ -25,9 +25,11 @@ class Input {
     
     std::shared_ptr<std::istream> stream;
     
+    unsigned int batchSize = 10000;
+    
 public:
     
-    void load(UserInputKreeq userInput);
+    void load(UserInputKcount userInput);
     
     void read(InSequences& inSequence);
     

@@ -7,6 +7,8 @@ struct buf64 {
 };
 
 class Kcount {
+    
+    std::vector<Log> logs;
 
     uint8_t k;
     
@@ -14,9 +16,11 @@ class Kcount {
     
     const uint64_t mapCount = k < 28 ? pow(4,k/4) : pow(4,6);
     
+    const uint64_t moduloMap = (uint64_t) pow(4,k) / mapCount;
+    
     uint64_t* pows = new uint64_t[k];
 
-    buf64* buf = new buf64[mapCount];
+    std::vector<buf64*> buffers;
     
     phmap::flat_hash_map<uint64_t, uint64_t>* map = new phmap::flat_hash_map<uint64_t, uint64_t>[mapCount];
     
@@ -43,37 +47,39 @@ class Kcount {
     
 public:
     
-    Kcount(std::vector<InSegment*>* segments, uint8_t k) : k(k) {
+    Kcount(uint8_t k) : k(k) {
         
         for(uint8_t p = 0; p<k; ++p)
             pows[p] = (uint64_t) pow(4,p);
         
-        count(segments);
-        
     };
-    
-    inline uint64_t hash(uint8_t* string);
-    
-    void count(std::vector<InSegment*>* segments);
-    
-    bool countBuff(buf64* buf, phmap::flat_hash_map<uint64_t, uint64_t>& map);
-    
-    bool countUnique(phmap::flat_hash_map<uint64_t, uint64_t>& map);
-    
-    void resizeBuff(buf64* buff);
-    
-    void printHist();
     
     ~Kcount(){
         
         delete[] map;
-        
-        for(uint16_t i = 0; i<mapCount; i++)
-            delete[] buf[i].seq;
-        
-        delete[] buf;
+        delete[] pows;
         
     }
+    
+    bool traverseInReads(Sequences* readBatch);
+    
+    void appendReads(Sequences* readBatch);
+    
+    inline uint64_t hash(uint8_t* string);
+    
+    void hashSequences(Sequences* readBatch);
+    
+    void hashSegments(std::vector<InSegment*>* segments);
+    
+    void count();
+    
+    bool countBuff(uint16_t m);
+    
+    bool histogram(phmap::flat_hash_map<uint64_t, uint64_t>& map);
+    
+    void resizeBuff(buf64* buff);
+    
+    void printHist();
 
 };
 

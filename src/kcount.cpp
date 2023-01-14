@@ -15,6 +15,40 @@
 
 #include "kcount.h"
 
+bool Kcount::traverseInReads(Sequences* readBatch) { // traverse the read
+
+    Log threadLog;
+    
+    threadLog.setId(readBatch->batchN);
+
+    hashSequences(readBatch);
+    
+    delete readBatch;
+    
+    return true;
+    
+}
+
+void Kcount::appendReads(Sequences* readBatch) { // read a collection of reads
+    
+    threadPool.queueJob([=]{ return traverseInReads(readBatch); });
+    
+    std::unique_lock<std::mutex> lck (mtx, std::defer_lock);
+    
+    lck.lock();
+    
+    for (auto it = logs.begin(); it != logs.end(); it++) {
+     
+        it->print();
+        logs.erase(it--);
+        if(verbose_flag) {std::cerr<<"\n";};
+        
+    }
+    
+    lck.unlock();
+    
+}
+
 inline uint64_t Kcount::hash(uint8_t *kmer) {
     
     uint64_t fw = 0, rv = 0;
@@ -30,21 +64,35 @@ inline uint64_t Kcount::hash(uint8_t *kmer) {
     return fw < rv ? fw : rv;
 }
 
-bool Kcount::countBuff(buf64* buf, phmap::flat_hash_map<uint64_t, uint64_t>& map) {
+bool Kcount::countBuff(uint16_t m) {
 
 //    only if sorted table is needed:
 //    std::sort(buff.begin(), buff.end());
     
-    uint64_t len = buf->pos;
+    buf64* thisBuf;
     
-    for (uint64_t c = 0; c<len; ++c)
-        ++map[buf->seq[c]];
+    phmap::flat_hash_map<uint64_t, uint64_t>* thisMap;
+    
+    for(buf64* buf : buffers) {
+        
+        thisBuf = &buf[m];
+        
+        thisMap = &map[m];
+        
+        uint64_t len = thisBuf->pos;
+        
+        for (uint64_t c = 0; c<len; ++c)
+            ++(*thisMap)[thisBuf->seq[c]];
+        
+        delete[] thisBuf->seq;
+        
+    }
     
     return true;
 
 }
 
-bool Kcount::countUnique(phmap::flat_hash_map<uint64_t, uint64_t>& map) {
+bool Kcount::histogram(phmap::flat_hash_map<uint64_t, uint64_t>& map) {
     
     uint64_t kmersUnique = 0, kmersDistinct = 0;
     
@@ -87,24 +135,86 @@ void Kcount::printHist() {
 
 }
 
-void Kcount::count(std::vector<InSegment*>* segments) {
+void Kcount::hashSequences(Sequences* readBatch) {
     
-    uint64_t moduloMap = (uint64_t) pow(4,k) / mapCount;
+    buf64* buf = new buf64[mapCount];
     
-    lg.verbose("Counting with " + std::to_string(mapCount) + " maps");
+    for (Sequence* sequence : readBatch->sequences) {
+        
+        uint64_t len = sequence->sequence->size(), kcount = len-k+1;
+        
+        if (len<k)
+            continue;
+        
+        totKmers += kcount;
+        
+        unsigned char* first = (unsigned char*)sequence->sequence->c_str();
+        
+        uint8_t* str = new uint8_t[len];
+        
+        for (uint64_t i = 0; i<len; ++i){
+            
+            str[i] = ctoi[*(first+i)];
+            
+        }
+        
+        uint64_t value, i, newSize;
+        buf64* b;
+        uint64_t* bufNew;
+        
+        for (uint64_t c = 0; c<kcount; ++c){
+            
+            value = hash(str+c);
+            
+            i = value / moduloMap;
+            
+            b = &buf[i];
+            
+            if (b->pos == b->size) {
+                
+                newSize = b->size * 2;
+                bufNew = new uint64_t[newSize];
+
+                memcpy(bufNew, b->seq, b->size*sizeof(uint64_t));
+
+                b->size = newSize;
+                delete [] b->seq;
+                b->seq = bufNew;
+
+            }
+            
+            b->seq[b->pos++] = value;
+                        
+        }
+        
+        delete[] str;
+        
+        lg.verbose("Processed sequence: " + sequence->header);
+        
+    }
+    
+    std::unique_lock<std::mutex> lck(mtx);
+    
+    buffers.push_back(buf);
+    
+}
+
+void Kcount::hashSegments(std::vector<InSegment*>* segments) {
+    
+    buf64* buf = new buf64[mapCount];
     
     for (InSegment* segment : *segments) {
         
-        if (segment->getSegmentLen()<k)
-            continue;
-        
         uint64_t len = segment->getSegmentLen(), kcount = len-k+1;
+        
+        if (len<k)
+            continue;
         
         totKmers += kcount;
         
         unsigned char* first = (unsigned char*)segment->getInSequencePtr()->c_str();
         
-        uint8_t* str = new uint8_t[segment->getSegmentLen()];
+        uint8_t* str = new uint8_t[len];
         
         for (uint64_t i = 0; i<len; ++i){
             
@@ -147,19 +257,27 @@ void Kcount::count(std::vector<InSegment*>* segments) {
         
     }
     
-    lg.verbose("Populating maps");
+    std::unique_lock<std::mutex> lck(mtx);
+    
+    buffers.push_back(buf);
+    
+}
+
+void Kcount::count() {
+    
+    lg.verbose("Counting with " + std::to_string(mapCount) + " maps");
     
     for(uint16_t m = 0; m<mapCount; ++m)
-        threadPool.queueJob([=]{ return countBuff(&buf[m], map[m]); });
+        threadPool.queueJob([=]{ return countBuff(m); });
     
     jobWait(threadPool);
     
     if(verbose_flag) {std::cerr<<"\n\n";};
     
-    lg.verbose("Counting unique kmers");
+    lg.verbose("Generate histogram");
     
     for(uint16_t m = 0; m<mapCount; ++m)
-        threadPool.queueJob([=]{ return countUnique(map[m]); });
+        threadPool.queueJob([=]{ return histogram(map[m]); });
     
     jobWait(threadPool);
     
