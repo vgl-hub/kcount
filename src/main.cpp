@@ -65,6 +65,7 @@ int main(int argc, char **argv) {
     static struct option long_options[] = { // struct mapping long options
         {"input-sequence", required_argument, 0, 'f'},
 		{"kmer-length", required_argument, 0, 'k'},
+        {"out-format", required_argument, 0, 'o'},
         
 		{"verbose", no_argument, &verbose_flag, 1},
 		{"cmd", no_argument, &cmd_flag, 1},
@@ -79,7 +80,7 @@ int main(int argc, char **argv) {
         
         int option_index = 0;
         
-        c = getopt_long(argc, argv, "-:f:k:j:v:h",
+        c = getopt_long(argc, argv, "-:f:k:j:o:v:h",
                         long_options, &option_index);
         
         if (c == -1) { // exit the loop if run out of options
@@ -137,6 +138,11 @@ int main(int argc, char **argv) {
                 maxThreads = atoi(optarg);
                 break;
                 
+            case 'o': // handle output (file or stdout)
+                userInput.outSequence = optarg;
+                outFile_flag = 1;
+                break;
+                
             case 'v': // software version
                 printf("kreeq v%s\n", version.c_str());
                 printf("Giulio Formenti giulio.formenti@gmail.com\n");
@@ -148,6 +154,7 @@ int main(int argc, char **argv) {
                 printf("-f --input-sequence sequence input file (fasta,gfa1/2).\n");
 				printf("-k --kmer-length length of kmers.\n");
                 printf("-j --threads <n> numbers of threads (default: max).\n");
+                printf("-o --out-format generates various kinds of outputs (currently supported: .hist).\n");
                 printf("-v --version software version.\n");
                 printf("--cmd print $0 to stdout.\n");
                 exit(0);
@@ -174,12 +181,12 @@ int main(int argc, char **argv) {
 	in.load(userInput); // load user input
 	
 	lg.verbose("Loaded user input");
-	
-	InSequences inSequences; // initialize sequence collection object
-	
-	lg.verbose("Sequence object generated");
-	
-	in.read(inSequences); // read input content to inSequences container
+    
+    threadPool.init(maxThreads); // initialize threadpool
+    
+    in.read(); // read input content
+    
+    threadPool.join(); // join threads
 
     exit(EXIT_SUCCESS);
 	

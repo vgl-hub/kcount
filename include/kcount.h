@@ -9,6 +9,22 @@ struct buf64 {
 class Kcount {
     
     std::vector<Log> logs;
+    
+    //intermediates
+    std::string h;
+    char* c;
+    
+    // stream read variable definition
+    std::string firstLine;
+    unsigned int seqPos = 0; // to keep track of the original sequence order
+    
+    std::string newLine, seqHeader, seqComment, line, bedHeader;
+    
+    StreamObj streamObj;
+    
+    std::shared_ptr<std::istream> stream;
+    
+    unsigned int batchSize = 10000;
 
     uint8_t k;
     
@@ -61,6 +77,8 @@ public:
         
     }
     
+    void load(UserInputKcount& userInput);
+    
     bool traverseInReads(Sequences* readBatch);
     
     void appendReads(Sequences* readBatch);
@@ -79,7 +97,9 @@ public:
     
     void resizeBuff(buf64* buff);
     
-    void printHist();
+    void printHist(std::unique_ptr<std::ostream>& ostream);
+    
+    void report(UserInputKcount& userInput);
 
 };
 

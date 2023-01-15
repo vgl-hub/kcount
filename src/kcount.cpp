@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <string>
 #include <iostream>
+#include <fstream>
 #include <vector>
 #include <math.h>
 
@@ -8,12 +9,208 @@
 
 #include "bed.h"
 #include "struct.h"
+#include "functions.h"
 #include "global.h"
 #include "uid-generator.h"
 #include "gfa-lines.h"
 #include "gfa.h"
+#include "stream-obj.h"
+#include "input.h"
 
 #include "kcount.h"
+
+void Kcount::load(UserInputKcount& userInput) {
+    
+    InSequences inSequences;
+    
+    if (!userInput.iSeqFileArg.empty() || userInput.pipeType == 'f') {
+        
+        StreamObj streamObj;
+        
+        stream = streamObj.openStream(userInput, 'f');
+        
+        if (stream) {
+            
+            switch (stream->peek()) {
+                    
+                case '>': {
+                    
+                    stream->get();
+                    
+                    while (getline(*stream, newLine)) {
+                        
+                        h = std::string(strtok(strdup(newLine.c_str())," ")); //process header line
+                        c = strtok(NULL,""); //read comment
+                        
+                        seqHeader = h;
+                        
+                        if (c != NULL) {
+                            
+                            seqComment = std::string(c);
+                            
+                        }
+                        
+                        std::string* inSequence = new std::string;
+                        
+                        getline(*stream, *inSequence, '>');
+                        
+                        lg.verbose("Individual fasta sequence read");
+                        
+                        Sequence* sequence = new Sequence{seqHeader, seqComment, inSequence, NULL};
+                        
+                        sequence->seqPos = seqPos; // remember the order
+                        
+                        inSequences.appendSequence(sequence);
+                        
+                        seqPos++;
+                        
+                    }
+                    
+                    jobWait(threadPool);
+                    
+                    if(verbose_flag) {std::cerr<<"\n\n";};
+                    
+                    std::vector<Log> logs = inSequences.getLogs();
+                    
+                    //consolidate log
+                    for (auto it = logs.begin(); it != logs.end(); it++) {
+                        
+                        it->print();
+                        logs.erase(it--);
+                        if(verbose_flag) {std::cerr<<"\n";};
+                        
+                    }
+                    
+                    hashSegments(inSequences.getInSegments());
+                    
+                    break;
+                    
+                }
+                    
+                case '@': {
+                    
+                    Sequences* readBatch = new Sequences;
+
+                    while (getline(*stream, newLine)) { // file input
+
+                        newLine.erase(0, 1);
+
+                        h = std::string(strtok(strdup(newLine.c_str())," ")); //process header line
+                        c = strtok(NULL,""); //read comment
+                        
+                        seqHeader = h;
+                        
+                        if (c != NULL) {
+                            
+                            seqComment = std::string(c);
+                            
+                        }
+
+                        std::string* inSequence = new std::string;
+                        getline(*stream, *inSequence);
+
+                        getline(*stream, newLine);
+                        
+                        ignore(*stream, '\n');
+
+                        readBatch->sequences.push_back(new Sequence {seqHeader, seqComment, inSequence});
+                        seqPos++;
+
+                        if (seqPos % batchSize == 0) {
+
+                            readBatch->batchN = seqPos/batchSize;
+                            
+                            lg.verbose("Processing batch N: " + std::to_string(readBatch->batchN));
+
+                            appendReads(readBatch);
+
+                            readBatch = new Sequences;
+
+                        }
+
+                        lg.verbose("Individual fastq sequence read: " + seqHeader);
+
+                    }
+                    
+                    readBatch->batchN = seqPos/batchSize + 1;
+                        
+                    lg.verbose("Processing batch N: " + std::to_string(readBatch->batchN));
+
+                    appendReads(readBatch);
+                    
+                    jobWait(threadPool);
+                    
+                    std::vector<Log> logs = inSequences.getLogs();
+                    
+                    //consolidate log
+                    for (auto it = logs.begin(); it != logs.end(); it++) {
+                        
+                        it->print();
+                        logs.erase(it--);
+                        if(verbose_flag) {std::cerr<<"\n";};
+                        
+                    }
+
+                    break;
+
+                }
+                    
+            }
+            
+        }
+        
+    }
+        
+    count();
+    
+}
+
+void Kcount::report(UserInputKcount& userInput) {
+   
+    std::cout<<"Total: "<<totKmers<<"\n";
+    std::cout<<"Unique: "<<totKmersUnique<<"\n";
+    std::cout<<"Distinct: "<<totKmersDistinct<<"\n";
+    uint64_t missing = pow(4,k)-totKmersDistinct;
+    std::cout<<"Missing: "<<missing<<"\n\n";
+    
+    const static phmap::flat_hash_map<std::string,int> string_to_case{
+        {"hist",1}
+
+    };
+    
+    // variable to handle output path and extension
+    std::string path = rmFileExt(userInput.outSequence);
+    std::string ext = getFileExt("." + userInput.outSequence);
+    
+    lg.verbose("Writing ouput: " + ext);
+    
+    // here we create a smart pointer to handle any kind of output stream
+    std::unique_ptr<std::ostream> ostream;
+    
+    switch (string_to_case.count(ext) ? string_to_case.at(ext) : 0) { // this switch allows us to generate the output according to the input request and the unordered map. If the requested output format is not in the map we fall back to the undefined case (0)
+            
+        case 1: { // .hist
+            
+            std::ofstream ofs(userInput.outSequence);
+            
+            ostream = std::make_unique<std::ostream>(ofs.rdbuf());
+            
+            printHist(ostream);
+            
+            break;
+            
+        }
+        default: {
+            
+            ostream = std::make_unique<std::ostream>(std::cout.rdbuf());
+            
+            printHist(ostream);
+            
+        }
+            
+    }
+    
+}
 
 bool Kcount::traverseInReads(Sequences* readBatch) { // traverse the read
 
@@ -117,13 +314,13 @@ bool Kcount::histogram(phmap::flat_hash_map<uint64_t, uint64_t>& map) {
 
 }
 
-void Kcount::printHist() {
+void Kcount::printHist(std::unique_ptr<std::ostream>& ostream) {
     
     std::vector<std::pair<uint64_t, uint64_t>> table(histogram1.begin(), histogram1.end());
     std::sort(table.begin(), table.end());
     
     for (auto pair : table)
-        std::cout<<pair.first<<"\t"<<pair.second<<"\n";
+        *ostream<<pair.first<<"\t"<<pair.second<<"\n";
 
 }
 
@@ -284,13 +481,5 @@ void Kcount::count() {
     jobWait(threadPool);
     
     if(verbose_flag) {std::cerr<<"\n\n";};
-    
-    std::cout<<"Total: "<<totKmers<<"\n";
-    std::cout<<"Unique: "<<totKmersUnique<<"\n";
-    std::cout<<"Distinct: "<<totKmersDistinct<<"\n";
-    uint64_t missing = pow(4,k)-totKmersDistinct;
-    std::cout<<"Missing: "<<missing<<"\n\n";
-    
-    printHist();
     
 }
