@@ -27,6 +27,8 @@ debug: CXXFLAGS += -DDEBUG
 debug: CCFLAGS += -DDEBUG
 debug: head
 
+all: head validate
+
 $(OBJS): %: $(BINDIR)/%
 	@
 $(BINDIR)%: $(SOURCE)/%.cpp $(INCLUDE)/%.h | $(BINDIR)
