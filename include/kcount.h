@@ -100,6 +100,10 @@ public:
     void printHist(std::unique_ptr<std::ostream>& ostream);
     
     void report(UserInputKcount& userInput);
+    
+    bool dumpMap(std::string prefix, uint16_t m);
+    
+    bool loadMap(std::string prefix, uint16_t m);
 
 };
 

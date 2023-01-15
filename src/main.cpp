@@ -154,7 +154,7 @@ int main(int argc, char **argv) {
                 printf("-f --input-sequence sequence input file (fasta,gfa1/2).\n");
 				printf("-k --kmer-length length of kmers.\n");
                 printf("-j --threads <n> numbers of threads (default: max).\n");
-                printf("-o --out-format generates various kinds of outputs (currently supported: .hist).\n");
+                printf("-o --out-format generates various kinds of outputs (currently supported: .hist .kc).\n");
                 printf("-v --version software version.\n");
                 printf("--cmd print $0 to stdout.\n");
                 exit(0);

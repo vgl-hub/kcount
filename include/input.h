@@ -4,6 +4,7 @@
 struct UserInputKcount : UserInput {
 
     unsigned short int kmerLen = 21; // default
+    std::string outFile;
 
 };
 

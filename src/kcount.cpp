@@ -4,8 +4,10 @@
 #include <fstream>
 #include <vector>
 #include <math.h>
+#include <sys/stat.h>
 
 #include <parallel_hashmap/phmap.h>
+#include "parallel_hashmap/phmap_dump.h"
 
 #include "bed.h"
 #include "struct.h"
@@ -68,8 +70,6 @@ void Kcount::load(UserInputKcount& userInput) {
                     
                     jobWait(threadPool);
                     
-                    if(verbose_flag) {std::cerr<<"\n\n";};
-                    
                     std::vector<Log> logs = inSequences.getLogs();
                     
                     //consolidate log
@@ -77,7 +77,6 @@ void Kcount::load(UserInputKcount& userInput) {
                         
                         it->print();
                         logs.erase(it--);
-                        if(verbose_flag) {std::cerr<<"\n";};
                         
                     }
                     
@@ -147,7 +146,6 @@ void Kcount::load(UserInputKcount& userInput) {
                         
                         it->print();
                         logs.erase(it--);
-                        if(verbose_flag) {std::cerr<<"\n";};
                         
                     }
 
@@ -165,37 +163,82 @@ void Kcount::load(UserInputKcount& userInput) {
     
 }
 
+bool Kcount::loadMap(std::string prefix, uint16_t m) { // loading prototype
+    
+    prefix.append("/.kcount." + std::to_string(m) + ".bin");
+    
+    phmap::BinaryInputArchive ar_in(prefix.c_str());
+    map[m].phmap_load(ar_in);
+    
+    printMap(map[m]);
+    
+    return true;
+
+}
+
+bool Kcount::dumpMap(std::string prefix, uint16_t m) {
+    
+    prefix.append("/.kcount." + std::to_string(m) + ".bin");
+    
+    phmap::BinaryOutputArchive ar_out(prefix.c_str());
+    map[m].phmap_dump(ar_out);
+    
+    return true;
+    
+}
+
 void Kcount::report(UserInputKcount& userInput) {
-   
-    std::cout<<"Total: "<<totKmers<<"\n";
-    std::cout<<"Unique: "<<totKmersUnique<<"\n";
-    std::cout<<"Distinct: "<<totKmersDistinct<<"\n";
-    uint64_t missing = pow(4,k)-totKmersDistinct;
-    std::cout<<"Missing: "<<missing<<"\n\n";
     
     const static phmap::flat_hash_map<std::string,int> string_to_case{
-        {"hist",1}
+        {"stats",1},
+        {"hist",2},
+        {"kc",3}
 
     };
     
     // variable to handle output path and extension
-    std::string path = rmFileExt(userInput.outSequence);
-    std::string ext = getFileExt("." + userInput.outSequence);
+    std::string path = rmFileExt(userInput.outFile);
+    std::string ext = getFileExt("." + userInput.outFile);
     
     lg.verbose("Writing ouput: " + ext);
     
     // here we create a smart pointer to handle any kind of output stream
     std::unique_ptr<std::ostream> ostream;
     
-    switch (string_to_case.count(ext) ? string_to_case.at(ext) : 0) { // this switch allows us to generate the output according to the input request and the unordered map. If the requested output format is not in the map we fall back to the undefined case (0)
+    switch (string_to_case.count(ext) ? string_to_case.at(ext) : 0) {
             
-        case 1: { // .hist
+        case 1: { // .stats
             
-            std::ofstream ofs(userInput.outSequence);
+            std::ofstream ofs(userInput.outFile);
+            
+            ostream = std::make_unique<std::ostream>(ofs.rdbuf());
+            
+            *ostream<<"\nTotal: "<<totKmers<<"\n";
+            *ostream<<"Unique: "<<totKmersUnique<<"\n";
+            *ostream<<"Distinct: "<<totKmersDistinct<<"\n";
+            uint64_t missing = pow(4,k)-totKmersDistinct;
+            *ostream<<"Missing: "<<missing<<"\n\n";
+            
+        }
+        case 2: { // .hist
+            
+            std::ofstream ofs(userInput.outFile);
             
             ostream = std::make_unique<std::ostream>(ofs.rdbuf());
             
             printHist(ostream);
+            
+            break;
+            
+        }
+        case 3: { // .kc
+            
+            mkdir(userInput.outFile.c_str(),0777);
+            
+            for(uint16_t m = 0; m<mapCount; ++m)
+                threadPool.queueJob([=]{ return dumpMap(userInput.outFile, m); });
+            
+            jobWait(threadPool);
             
             break;
             
@@ -205,6 +248,12 @@ void Kcount::report(UserInputKcount& userInput) {
             ostream = std::make_unique<std::ostream>(std::cout.rdbuf());
             
             printHist(ostream);
+            
+            *ostream<<"\nTotal: "<<totKmers<<"\n";
+            *ostream<<"Unique: "<<totKmersUnique<<"\n";
+            *ostream<<"Distinct: "<<totKmersDistinct<<"\n";
+            uint64_t missing = pow(4,k)-totKmersDistinct;
+            *ostream<<"Missing: "<<missing<<"\n\n";
             
         }
             
@@ -232,7 +281,6 @@ void Kcount::appendReads(Sequences* readBatch) { // read a collection of reads
      
         it->print();
         logs.erase(it--);
-        if(verbose_flag) {std::cerr<<"\n";};
         
     }
     
@@ -471,15 +519,11 @@ void Kcount::count() {
     
     jobWait(threadPool);
     
-    if(verbose_flag) {std::cerr<<"\n\n";};
-    
     lg.verbose("Generate histogram");
     
     for(uint16_t m = 0; m<mapCount; ++m)
         threadPool.queueJob([=]{ return histogram(map[m]); });
     
     jobWait(threadPool);
-    
-    if(verbose_flag) {std::cerr<<"\n\n";};
     
 }

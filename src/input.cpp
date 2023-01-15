@@ -47,8 +47,6 @@ void Input::read() {
     
     kcount.load(userInput);
 
-    jobWait(threadPool);
-
     kcount.report(userInput);
     
 }
