@@ -139,7 +139,7 @@ int main(int argc, char **argv) {
                 break;
                 
             case 'o': // handle output (file or stdout)
-                userInput.outSequence = optarg;
+                userInput.outFile = optarg;
                 outFile_flag = 1;
                 break;
                 

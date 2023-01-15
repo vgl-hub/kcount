@@ -1,10 +1,5 @@
 -f testFiles/random1.fastq -k 21
 embedded
-Total: 1383623
-Unique: 1345128
-Distinct: 1356078
-Missing: 4398045155026
-
 1	1345128
 2	6250
 3	2310
@@ -48,3 +43,8 @@ Missing: 4398045155026
 41	1
 144	1
 148	1
+
+Total: 1383623
+Unique: 1345128
+Distinct: 1356078
+Missing: 4398045155026
