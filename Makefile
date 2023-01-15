@@ -5,6 +5,7 @@ WARNINGS = -Wall -Wextra
 CXXFLAGS = -g -std=gnu++14 -O3 $(INCLUDE_DIR) $(WARNINGS)
 
 TARGET = kcount
+TEST_TARGET = validate
 BUILD = build/bin
 SOURCE = src
 INCLUDE = include
@@ -34,6 +35,9 @@ $(BINDIR)%: $(SOURCE)/%.cpp $(INCLUDE)/%.h | $(BINDIR)
 .PHONY: gfalibs
 gfalibs:
 	$(MAKE) -j -C $(GFALIBS_DIR) CXXFLAGS="$(CXXFLAGS)"
+	
+validate: | $(BUILD)
+	$(CXX) $(CXXFLAGS) -o $(BUILD)/$(TARGET)-$(TEST_TARGET) $(SOURCE)/$(TEST_TARGET).cpp $(LIBS)
 	
 $(BUILD):
 	-mkdir -p $@
