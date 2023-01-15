@@ -29,9 +29,7 @@ void Kcount::appendReads(Sequences* readBatch) { // read a collection of reads
     
     threadPool.queueJob([=]{ return traverseInReads(readBatch); });
     
-    std::unique_lock<std::mutex> lck (mtx, std::defer_lock);
-    
-    lck.lock();
+    std::unique_lock<std::mutex> lck(mtx);
     
     for (auto it = logs.begin(); it != logs.end(); it++) {
      
@@ -40,8 +38,6 @@ void Kcount::appendReads(Sequences* readBatch) { // read a collection of reads
         if(verbose_flag) {std::cerr<<"\n";};
         
     }
-    
-    lck.unlock();
     
 }
 

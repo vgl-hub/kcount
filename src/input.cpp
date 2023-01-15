@@ -46,8 +46,6 @@ void Input::read(InSequences& inSequences) {
     
     threadPool.init(maxThreads); // initialize threadpool
     
-    stream = streamObj.openStream(userInput, 'f');
-    
     if (!userInput.iSeqFileArg.empty() || userInput.pipeType == 'f') {
         
         StreamObj streamObj;
@@ -164,6 +162,17 @@ void Input::read(InSequences& inSequences) {
                     kcount.appendReads(readBatch);
                     
                     jobWait(threadPool);
+                    
+                    std::vector<Log> logs = inSequences.getLogs();
+                    
+                    //consolidate log
+                    for (auto it = logs.begin(); it != logs.end(); it++) {
+                        
+                        it->print();
+                        logs.erase(it--);
+                        if(verbose_flag) {std::cerr<<"\n";};
+                        
+                    }
 
                     break;
 

@@ -22,6 +22,10 @@ BINS := $(addprefix $(BINDIR)/, $(OBJS))
 head: $(BINS) gfalibs | $(BUILD)
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $(BUILD)/$(TARGET) $(wildcard $(BINDIR)/*) $(GFALIBS_DIR)/*.o $(LIBS)
 
+debug: CXXFLAGS += -DDEBUG
+debug: CCFLAGS += -DDEBUG
+debug: head
+
 $(OBJS): %: $(BINDIR)/%
 	@
 $(BINDIR)%: $(SOURCE)/%.cpp $(INCLUDE)/%.h | $(BINDIR)
