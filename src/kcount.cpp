@@ -4,7 +4,6 @@
 #include <fstream>
 #include <vector>
 #include <math.h>
-#include <sys/stat.h>
 
 #include <parallel_hashmap/phmap.h>
 #include "parallel_hashmap/phmap_dump.h"
@@ -235,7 +234,7 @@ void Kcount::report(UserInputKcount& userInput) {
         }
         case 3: { // .kc
             
-            mkdir(userInput.outFile.c_str(),0777);
+            make_dir(userInput.outFile.c_str());
             
             for(uint16_t m = 0; m<mapCount; ++m)
                 threadPool.queueJob([=]{ return dumpMap(userInput.outFile, m); });
