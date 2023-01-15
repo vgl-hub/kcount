@@ -17,7 +17,7 @@ To check out all options and flags use `kcount -h`.
 You can test some typical usage with the files in the `testFiles` folder, e.g.:
 
 ```
-kcount -f testFiles/random1.fasta -k 3
+kcount -f testFiles/random1.fastq.gz -k 21 -o random1.hist
 ```
 
 ## How to cite
