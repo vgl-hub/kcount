@@ -219,6 +219,8 @@ void Kcount::report(UserInputKcount& userInput) {
             uint64_t missing = pow(4,k)-totKmersDistinct;
             *ostream<<"Missing: "<<missing<<"\n\n";
             
+            break;
+            
         }
         case 2: { // .hist
             
@@ -254,8 +256,6 @@ void Kcount::report(UserInputKcount& userInput) {
             *ostream<<"Distinct: "<<totKmersDistinct<<"\n";
             uint64_t missing = pow(4,k)-totKmersDistinct;
             *ostream<<"Missing: "<<missing<<"\n\n";
-            
-            break;
             
         }
             
