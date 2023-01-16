@@ -55,7 +55,17 @@ void Input::read(bool mode) {
         
     }else{
         
-        Kcount kcount(userInput.kmerLen);
+        std::ifstream file;
+
+        file.open(userInput.iSeqFileArg + "/.index");
+        std::string line;
+        
+        getline(file, line);
+        file.close();
+        
+        short unsigned int k = stoi(line);
+        
+        Kcount kcount(k);
         
         lg.verbose("Kmer object generated");
         

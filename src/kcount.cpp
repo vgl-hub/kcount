@@ -230,6 +230,8 @@ void Kcount::report(UserInputKcount& userInput) {
             uint64_t missing = pow(4,k)-totKmersDistinct;
             *ostream<<"Missing: "<<missing<<"\n";
             
+            ofs.close();
+            
             break;
             
         }
@@ -241,12 +243,22 @@ void Kcount::report(UserInputKcount& userInput) {
             
             printHist(ostream);
             
+            ofs.close();
+            
             break;
             
         }
         case 3: { // .kc
             
             make_dir(userInput.outFile.c_str());
+            
+            std::ofstream ofs(userInput.outFile + "/.index");
+            
+            ostream = std::make_unique<std::ostream>(ofs.rdbuf());
+            
+            *ostream<<+k<<"\n"<<mapCount<<std::endl;
+            
+            ofs.close();
             
             for(uint16_t m = 0; m<mapCount; ++m)
                 threadPool.queueJob([=]{ return dumpMap(userInput.outFile, m); });
