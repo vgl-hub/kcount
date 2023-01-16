@@ -1,4 +1,4 @@
-kcount -f testFiles/random1.fastq.gz -k 21
+count -f testFiles/random1.fastq.gz -k 21
 embedded
 1	1345128
 2	6250

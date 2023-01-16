@@ -20,7 +20,7 @@
 
 #include "kcount.h"
 
-void Kcount::load(UserInputKcount& userInput) {
+void Kcount::convert(UserInputKcount& userInput) {
     
     InSequences inSequences;
     
@@ -157,8 +157,22 @@ void Kcount::load(UserInputKcount& userInput) {
         }
         
     }
-        
-    count();
+    
+}
+
+void Kcount::load(UserInputKcount& userInput){
+    
+    for(uint16_t m = 0; m<mapCount; ++m)
+        threadPool.queueJob([=]{ return loadMap(userInput.iSeqFileArg, m); });
+    
+    jobWait(threadPool);
+    
+    lg.verbose("Regenerate histogram");
+    
+    for(uint16_t m = 0; m<mapCount; ++m)
+        threadPool.queueJob([=]{ return histogram(map[m]); });
+    
+    jobWait(threadPool);
     
 }
 
@@ -168,8 +182,6 @@ bool Kcount::loadMap(std::string prefix, uint16_t m) { // loading prototype
     
     phmap::BinaryInputArchive ar_in(prefix.c_str());
     map[m].phmap_load(ar_in);
-    
-    printMap(map[m]);
     
     return true;
 
@@ -357,6 +369,8 @@ bool Kcount::histogram(phmap::flat_hash_map<uint64_t, uint64_t>& map) {
         
         histogram1[pair.first] += pair.second;
         
+        totKmers += pair.first * pair.second;
+        
     }
     
     return true;
@@ -381,16 +395,12 @@ void Kcount::hashSequences(Sequences* readBatch) {
     
     buf64* buf = new buf64[mapCount];
     
-    uint64_t kmers = 0;
-    
     for (Sequence* sequence : readBatch->sequences) {
         
         uint64_t len = sequence->sequence->size(), kcount = len-k+1;
         
         if (len<k)
             continue;
-        
-        kmers += kcount;
         
         unsigned char* first = (unsigned char*)sequence->sequence->c_str();
         
@@ -439,8 +449,6 @@ void Kcount::hashSequences(Sequences* readBatch) {
     
     std::unique_lock<std::mutex> lck(mtx);
     
-    totKmers += kmers;
-    
     buffers.push_back(buf);
     
     logs.push_back(threadLog);
@@ -457,8 +465,6 @@ void Kcount::hashSegments(std::vector<InSegment*>* segments) {
         
         if (len<k)
             continue;
-        
-        totKmers += kcount;
         
         unsigned char* first = (unsigned char*)segment->getInSequencePtr()->c_str();
         

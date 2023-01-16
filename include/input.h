@@ -16,7 +16,7 @@ public:
     
     void load(UserInputKcount userInput);
     
-    void read();
+    void read(bool mode);
     
 };
 

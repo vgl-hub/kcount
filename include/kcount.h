@@ -77,6 +77,8 @@ public:
         
     }
     
+    void convert(UserInputKcount& userInput);
+    
     void load(UserInputKcount& userInput);
     
     bool traverseInReads(Sequences* readBatch);

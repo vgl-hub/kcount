@@ -37,16 +37,32 @@ void Input::load(UserInputKcount userInput) {
     
 }
 
-void Input::read() {
+void Input::read(bool mode) {
     
     if (userInput.iSeqFileArg.empty()) {return;}
     
-    Kcount kcount(userInput.kmerLen);
-    
-    lg.verbose("Kmer object generated");
-    
-    kcount.load(userInput);
-
-    kcount.report(userInput);
+    if (mode == 0) {
+        
+        Kcount kcount(userInput.kmerLen);
+        
+        lg.verbose("Kmer object generated");
+        
+        kcount.convert(userInput);
+        
+        kcount.count();
+        
+        kcount.report(userInput);
+        
+    }else{
+        
+        Kcount kcount(userInput.kmerLen);
+        
+        lg.verbose("Kmer object generated");
+        
+        kcount.load(userInput);
+        
+        kcount.report(userInput);
+        
+    }
     
 }

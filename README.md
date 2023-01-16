@@ -10,7 +10,7 @@ Either download one of the releases or `git clone https://github.com/vgl-hub/kco
 
 ## Usage
 
-`kcount -f input.[fasta|fastq|gfa][.gz] -k 21
+`kcount count -f input.[fasta|fastq][.gz] -k 21
 
 To check out all options and flags use `kcount -h`.
 
@@ -22,7 +22,7 @@ kcount -f testFiles/random1.fastq.gz -k 21 -o random1.hist
 
 ## How to cite
 
-This tools is part of the **gfastar** tool suite. If you use **kcount** in your work, please cite:
+This tool is part of the **gfastar** tool suite. If you use **kcount** in your work, please cite:
 
 Gfastats: conversion, evaluation and manipulation of genome sequences using assembly graphs
 
