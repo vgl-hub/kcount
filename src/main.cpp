@@ -53,7 +53,7 @@ int main(int argc, char **argv) {
     
     std::string cmd;
 
-    UserInputKcount userInput; // initialize input object
+    UserInputKmap userInput; // initialize input object
     
     if (argc == 1) { // gfastats with no arguments
             

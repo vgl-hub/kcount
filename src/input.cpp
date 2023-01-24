@@ -29,9 +29,10 @@
 #include "input-gfa.h"
 
 #include "input.h"
+#include "kmer.h"
 #include "kcount.h"
 
-void Input::load(UserInputKcount userInput) {
+void Input::load(UserInputKmap userInput) {
     
     this->userInput = userInput;
     
@@ -43,7 +44,7 @@ void Input::read(bool mode) {
     
     if (mode == 0) {
         
-        Kcount kcount(userInput.kmerLen);
+        Kmap<uint64_t> kcount(userInput.kmerLen);
         
         lg.verbose("Kmer object generated");
         
@@ -65,7 +66,7 @@ void Input::read(bool mode) {
         
         short unsigned int k = stoi(line);
         
-        Kcount kcount(k);
+        Kmap<uint64_t> kcount(k);
         
         lg.verbose("Kmer object generated");
         
