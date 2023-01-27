@@ -44,10 +44,11 @@ void Input::read(bool mode) {
     
     if (mode == 0) {
         
-        Kmap<UserInputKmap, uint64_t> kcount(userInput.kmerLen);
+        Kmap<UserInputKmap, uint64_t, uint64_t> kcount(userInput.kmerLen);
             
         lg.verbose("Loading input sequences");
         loadSequences(userInput, &kcount);
+        kcount.hashSegments();
         lg.verbose("Sequences loaded and hashed");
         
         kcount.count();
@@ -66,7 +67,7 @@ void Input::read(bool mode) {
         
         short unsigned int k = stoi(line);
         
-        Kmap<UserInputKmap, uint64_t> kcount(k);
+        Kmap<UserInputKmap, uint64_t, uint64_t> kcount(k);
         
         lg.verbose("Kmer object generated");
         
