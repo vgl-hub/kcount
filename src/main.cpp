@@ -70,7 +70,7 @@ int main(int argc, char **argv) {
         mode = 0;
         
         static struct option long_options[] = { // struct mapping long options
-            {"input-sequence", required_argument, 0, 'f'},
+            {"input-sequences", required_argument, 0, 'f'},
             {"kmer-length", required_argument, 0, 'k'},
             {"out-format", required_argument, 0, 'o'},
             
@@ -123,8 +123,13 @@ int main(int argc, char **argv) {
                         
                     }else{ // input is a regular file
                         
-                        ifFileExists(optarg);
-                        userInput.iSeqFileArg = optarg;
+                        optind--;
+                        for( ;optind < argc && *argv[optind] != '-' && !isInt(argv[optind]); optind++){
+                            
+                            ifFileExists(argv[optind]);
+                            userInput.iReadFileArg.push_back(argv[optind]);
+                            
+                        }
                         
                     }
                     
@@ -157,7 +162,7 @@ int main(int argc, char **argv) {
                 case 'h': // help
                     printf("kcount count [options]\n");
                     printf("\nOptions:\n");
-                    printf("\t-f --input-sequence sequence input file (fasta,gfa1/2).\n");
+                    printf("\t-f --input-sequences sequence input files (fasta,fastq).\n");
                     printf("\t-k --kmer-length length of kmers.\n");
                     printf("\t-j --threads <n> numbers of threads (default: max).\n");
                     printf("\t-o --out-format generates various kinds of outputs (currently supported: .hist .kc).\n");

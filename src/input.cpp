@@ -40,14 +40,16 @@ void Input::load(UserInputKmap userInput) {
 
 void Input::read(bool mode) {
     
-    if (userInput.iSeqFileArg.empty()) {return;}
-    
     if (mode == 0) {
         
         Kmap<UserInputKmap, uint64_t, uint64_t> kcount(userInput.kmerLen);
             
         lg.verbose("Loading input sequences");
-        loadSequences(userInput, &kcount);
+        unsigned int numFiles = userInput.iReadFileArg.size();
+        
+        for (unsigned int i = 0; i < numFiles; i++)
+            loadSequences(userInput, &kcount, 'r', &i);
+
         kcount.hashSegments();
         lg.verbose("Sequences loaded and hashed");
         
