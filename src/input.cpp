@@ -51,9 +51,14 @@ void Input::read(bool mode) {
             loadSequences(userInput, &kcount, 'r', &i);
 
         kcount.hashSegments();
+        
+        kcount.consolidate();
+        
         lg.verbose("Sequences loaded and hashed");
         
-        kcount.count();
+        kcount.hist();
+        
+        lg.verbose("Histogram generated");
         
         kcount.report(userInput);
         
