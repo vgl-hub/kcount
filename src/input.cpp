@@ -51,6 +51,8 @@ void Input::read(bool mode) {
             loadSequences(userInput, &kcount, 'r', &i);
 
         kcount.hashSegments();
+
+	jobWait(threadPool);
         
         kcount.consolidate();
         
