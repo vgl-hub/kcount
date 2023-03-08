@@ -54,6 +54,8 @@ void Input::read(bool mode) {
         
         kcount.consolidate();
         
+        jobWait(threadPool);
+        
         lg.verbose("Sequences loaded and hashed");
         
         kcount.hist();
