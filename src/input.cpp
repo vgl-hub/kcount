@@ -52,7 +52,7 @@ void Input::read(bool mode) {
 
         kcount.hashSegments();
 
-	jobWait(threadPool);
+        jobWait(threadPool);
         
         kcount.consolidate();
         
