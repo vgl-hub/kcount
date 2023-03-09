@@ -54,7 +54,7 @@ void Input::read(bool mode) {
 
         jobWait(threadPool);
         
-        kcount.consolidate();
+        kcount.finalize();
         
         jobWait(threadPool);
         
