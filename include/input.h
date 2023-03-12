@@ -1,7 +1,7 @@
 #ifndef INPUT_H
 #define INPUT_H
 
-struct UserInputKcount : UserInput {
+struct UserInputKmap : UserInput {
 
     unsigned short int kmerLen = 21; // default
     std::string outFile;
@@ -10,13 +10,13 @@ struct UserInputKcount : UserInput {
 
 class Input {
     
-    UserInputKcount userInput;
+    UserInputKmap userInput;
     
 public:
     
-    void load(UserInputKcount userInput);
+    void load(UserInputKmap userInput);
     
-    void read(bool mode);
+    void read(short unsigned int mode);
     
 };
 
