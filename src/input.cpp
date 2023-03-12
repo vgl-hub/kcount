@@ -38,53 +38,118 @@ void Input::load(UserInputKmap userInput) {
     
 }
 
-void Input::read(bool mode) {
+void Input::read(short unsigned int mode) {
     
-    if (mode == 0) {
-        
-        Kmap<UserInputKmap, uint64_t, uint64_t> kcount(userInput.kmerLen);
+    switch (mode) {
             
-        lg.verbose("Loading input sequences");
-        unsigned int numFiles = userInput.iReadFileArg.size();
+        case 0:
+            
+        {
+            
+            Kmap<UserInputKmap, uint64_t, uint64_t> kcount(userInput.kmerLen);
+            
+            lg.verbose("Loading input sequences");
+            unsigned int numFiles = userInput.iReadFileArg.size();
+            
+            for (unsigned int i = 0; i < numFiles; i++)
+                loadSequences(userInput, &kcount, 'r', &i);
+            
+            kcount.hashSegments();
+            
+            jobWait(threadPool);
+            
+            kcount.finalize();
+            
+            jobWait(threadPool);
+            
+            lg.verbose("Sequences loaded and hashed");
+            
+            kcount.hist();
+            
+            lg.verbose("Histogram generated");
+            
+            kcount.report(userInput);
+            
+            break;
+            
+        }
         
-        for (unsigned int i = 0; i < numFiles; i++)
-            loadSequences(userInput, &kcount, 'r', &i);
-
-        kcount.hashSegments();
-
-        jobWait(threadPool);
-        
-        kcount.finalize();
-        
-        jobWait(threadPool);
-        
-        lg.verbose("Sequences loaded and hashed");
-        
-        kcount.hist();
-        
-        lg.verbose("Histogram generated");
-        
-        kcount.report(userInput);
-        
-    }else{
-        
-        std::ifstream file;
-
-        file.open(userInput.iSeqFileArg + "/.index");
-        std::string line;
-        
-        getline(file, line);
-        file.close();
-        
-        short unsigned int k = stoi(line);
-        
-        Kmap<UserInputKmap, uint64_t, uint64_t> kcount(k);
-        
-        lg.verbose("Kmer object generated");
-        
-        kcount.load(userInput);
-        
-        kcount.report(userInput);
+        case 1:
+            
+        {
+            
+            std::ifstream file;
+            
+            file.open(userInput.iSeqFileArg + "/.index");
+            std::string line;
+            
+            getline(file, line);
+            file.close();
+            
+            short unsigned int k = stoi(line);
+            
+            Kmap<UserInputKmap, uint64_t, uint64_t> kcount(k);
+            
+            lg.verbose("Kmer object generated");
+            
+            kcount.load(userInput);
+            
+            kcount.report(userInput);
+            
+            break;
+            
+        }
+            
+        case 2:
+            
+        {
+            
+            std::ifstream file;
+            
+            lg.verbose("Merging input databases");
+            unsigned int numFiles = userInput.iReadFileArg.size();
+            
+            short unsigned int k = 0;
+            
+            for (unsigned int i = 0; i < numFiles; i++) {
+                
+                file.open(userInput.iReadFileArg[i] + "/.index");
+                std::string line;
+                
+                getline(file, line);
+                file.close();
+                
+                if (k == 0)
+                    k = stoi(line);
+                
+                if (k != stoi(line)) {
+                    fprintf(stderr, "Cannot merge databases with different kmer length\n");
+                    exit(1);
+                }
+                
+            }
+            
+            if (k == 0) {
+                fprintf(stderr, "Invalid kmer length\n");
+                exit(1);
+            }
+            
+            Kmap<UserInputKmap, uint64_t, uint64_t> kcount(k);
+            
+            lg.verbose("Kmer object generated. Merging.");
+            
+            kcount.kunion(userInput);
+            
+            kcount.report(userInput);
+            
+            break;
+            
+        }
+            
+        default:
+            
+            fprintf(stderr, "Invalid mode\n");
+            exit(1);
         
     }
     

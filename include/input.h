@@ -16,7 +16,7 @@ public:
     
     void load(UserInputKmap userInput);
     
-    void read(bool mode);
+    void read(short unsigned int mode);
     
 };
 
