@@ -129,7 +129,7 @@ void Input::read(short unsigned int mode) {
                 
             }
             
-            if (k == 0) {
+            if (k == 0 || k > 32) {
                 fprintf(stderr, "Invalid kmer length\n");
                 exit(1);
             }
