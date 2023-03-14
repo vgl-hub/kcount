@@ -52,7 +52,7 @@ void Input::read(short unsigned int mode) {
             unsigned int numFiles = userInput.iReadFileArg.size();
             
             for (unsigned int i = 0; i < numFiles; i++)
-                loadSequences(userInput, &kcount, 'r', &i);
+                loadKmers(userInput, &kcount, 'r', &i);
             
             kcount.hashSegments();
             
