@@ -46,7 +46,7 @@ void Input::read(short unsigned int mode) {
             
         {
             
-            Kmap<UserInputKmap, uint64_t, uint64_t> kcount(userInput.kmerLen);
+            Kmap<UserInputKmap, uint32_t, uint64_t> kcount(userInput.kmerLen);
             
             lg.verbose("Loading input sequences");
             unsigned int numFiles = userInput.iReadFileArg.size();
@@ -88,7 +88,7 @@ void Input::read(short unsigned int mode) {
             
             short unsigned int k = stoi(line);
             
-            Kmap<UserInputKmap, uint64_t, uint64_t> kcount(k);
+            Kmap<UserInputKmap, uint32_t, uint64_t> kcount(k);
             
             lg.verbose("Kmer object generated");
             
@@ -134,7 +134,7 @@ void Input::read(short unsigned int mode) {
                 exit(1);
             }
             
-            Kmap<UserInputKmap, uint64_t, uint64_t> kcount(k);
+            Kmap<UserInputKmap, uint32_t, uint64_t> kcount(k);
             
             lg.verbose("Kmer object generated. Merging.");
             
