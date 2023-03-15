@@ -6,7 +6,7 @@ A kmer counting tool
 
 ## Installation
 
-Either download one of the releases or `git clone https://github.com/vgl-hub/kcount.git --recursive` and `make -j` in `kcount` folder.
+Either download one of the releases or `git clone https://github.com/vgl-hub/kcount.git --recursive` and `make -j` in the `kcount` folder.
 
 ## Usage
 
