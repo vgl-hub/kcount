@@ -19,7 +19,7 @@ It accepts multiple files as input, separated by space. To check out all options
 You can test some typical usage with the files in the `testFiles` folder, e.g.:
 
 ```
-kcount union -d random2.kc random2.kc -o random1.hist
+kcount union -d testFiles/random2.kc testFiles/random2.kc -o random1.hist
 ```
 
 ## How to cite
