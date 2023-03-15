@@ -10,7 +10,9 @@ Either download one of the releases or `git clone https://github.com/vgl-hub/kco
 
 ## Usage
 
-`kcount count -f input.[fasta|fastq][.gz] -k 21`
+```
+kcount count -f input.[fasta|fastq][.gz] -k 21`
+```
 
 It accepts multiple files as input, separated by space. To check out all options and flags use `kcount -h`.
 
