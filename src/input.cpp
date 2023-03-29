@@ -32,31 +32,31 @@
 #include "kmer.h"
 #include "kcount.h"
 
-void Input::load(UserInputKmap userInput) {
+void Input::load(UserInputKmap userInput) { // a specialized userInput loading function
     
     this->userInput = userInput;
     
 }
 
-void Input::read(short unsigned int mode) {
+void Input::read(short unsigned int mode) { // reads the actual input and performing the tasks
     
     switch (mode) {
             
-        case 0:
+        case 0: // reads input reads and generates the kmer db
             
         {
             
-            Kmap<UserInputKmap, uint32_t, uint64_t> kcount(userInput.kmerLen);
+            Kmap<UserInputKmap, uint32_t, uint64_t> kcount(userInput.kmerLen); // a new empty kmerdb with the specified kmer length
             
             lg.verbose("Loading input sequences");
             unsigned int numFiles = userInput.iReadFileArg.size();
             
-            for (unsigned int i = 0; i < numFiles; i++)
-                loadKmers(userInput, &kcount, 'r', &i);
+            for (unsigned int i = 0; i < numFiles; i++) // for each input read file
+                loadKmers(userInput, &kcount, 'r', &i); // specialized function to process reads into kmers as hashes
             
-            kcount.hashSegments();
+            kcount.hashSegments(); // this is when a fasta is provided
             
-            jobWait(threadPool);
+            jobWait(threadPool); // ensures that all jobs are done before consolidating the kmerdb
             
             kcount.finalize();
             
@@ -64,23 +64,23 @@ void Input::read(short unsigned int mode) {
             
             lg.verbose("Sequences loaded and hashed");
             
-            kcount.hist();
+            kcount.hist(); // generates the final histogram
             
             lg.verbose("Histogram generated");
             
-            kcount.report(userInput);
+            kcount.report(userInput); // output
             
             break;
             
         }
         
-        case 1:
+        case 1: // reads an existing kmerdb
             
         {
             
             std::ifstream file;
             
-            file.open(userInput.iSeqFileArg + "/.index");
+            file.open(userInput.iSeqFileArg + "/.index"); // reads the kmer length from the index file
             std::string line;
             
             getline(file, line);
@@ -88,30 +88,30 @@ void Input::read(short unsigned int mode) {
             
             short unsigned int k = stoi(line);
             
-            Kmap<UserInputKmap, uint32_t, uint64_t> kcount(k);
+            Kmap<UserInputKmap, uint32_t, uint64_t> kcount(k); // a new empty kmerdb with the specified kmer length
             
             lg.verbose("Kmer object generated");
             
-            kcount.load(userInput);
+            kcount.load(userInput); // loads kmers into the new kmerdb
             
-            kcount.report(userInput);
+            kcount.report(userInput); // output
             
             break;
             
         }
             
-        case 2:
+        case 2: // union of multiple kmerdbs
             
         {
             
             std::ifstream file;
             
             lg.verbose("Merging input databases");
-            unsigned int numFiles = userInput.iReadFileArg.size();
+            unsigned int numFiles = userInput.iReadFileArg.size(); // number of input kmerdbs
             
             short unsigned int k = 0;
             
-            for (unsigned int i = 0; i < numFiles; i++) {
+            for (unsigned int i = 0; i < numFiles; i++) {  // reads the kmer length from the index files checking consistency between kmerdbs
                 
                 file.open(userInput.iReadFileArg[i] + "/.index");
                 std::string line;
@@ -134,13 +134,13 @@ void Input::read(short unsigned int mode) {
                 exit(1);
             }
             
-            Kmap<UserInputKmap, uint32_t, uint64_t> kcount(k);
+            Kmap<UserInputKmap, uint32_t, uint64_t> kcount(k); // a new empty kmerdb with the specified kmer length
             
             lg.verbose("Kmer object generated. Merging.");
             
-            kcount.kunion(userInput);
+            kcount.kunion(userInput); // union set
             
-            kcount.report(userInput);
+            kcount.report(userInput); // output
             
             break;
             
