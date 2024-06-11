@@ -5,8 +5,8 @@
 #include <vector>
 #include <math.h>
 
-#include <parallel_hashmap/phmap.h>
-#include "parallel_hashmap/phmap_dump.h"
+#include <parallel-hashmap/phmap.h>
+#include "parallel-hashmap/phmap_dump.h"
 
 #include "bed.h"
 #include "struct.h"

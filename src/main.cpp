@@ -9,8 +9,6 @@
 #include "log.h"
 #include "uid-generator.h"
 
-#include <parallel_hashmap/phmap.h>
-
 #include "bed.h"
 #include "struct.h"
 #include "functions.h"
@@ -21,7 +19,7 @@
 #include "input.h"
 #include "main.h"
 
-std::string version = "0.0.1";
+std::string version = "0.1.0";
 
 //global
 std::chrono::high_resolution_clock::time_point start = std::chrono::high_resolution_clock::now(); // immediately start the clock when the program is run
@@ -42,6 +40,7 @@ int maxThreads = 0;
 std::mutex mtx;
 ThreadPool<std::function<bool()>> threadPool;
 Log lg;
+std::vector<Log> logs;
 
 int main(int argc, char **argv) {
     
@@ -77,7 +76,7 @@ int main(int argc, char **argv) {
             
             int option_index = 1;
             
-            c = getopt_long(argc, argv, "-:f:k:j:o:h",
+            c = getopt_long(argc, argv, "-:k:j:o:r:h",
                             long_options, &option_index);
             
             if (c == -1) { // exit the loop if run out of options
@@ -105,26 +104,6 @@ int main(int argc, char **argv) {
                     
                     break;
                     
-                case 'f': // input sequence
-                    
-                    if (isPipe && userInput.pipeType == 'n') { // check whether input is from pipe and that pipe input was not already set
-                        
-                        userInput.pipeType = 'f'; // pipe input is a sequence
-                        
-                    }else{ // input is a regular file
-                        
-                        optind--;
-                        for( ;optind < argc && *argv[optind] != '-' && !isInt(argv[optind]); optind++){
-                            
-                            ifFileExists(argv[optind]);
-                            userInput.iReadFileArg.push_back(argv[optind]);
-                            
-                        }
-                        
-                    }
-                    
-                    break;
-                    
                 case 'k': // kmer length
                     
                     if (!isNumber(optarg)) {
@@ -144,6 +123,18 @@ int main(int argc, char **argv) {
                     outFile_flag = 1;
                     break;
                     
+                case 'r': // input reads
+                    if (isPipe && userInput.pipeType == 'n') { // check whether input is from pipe and that pipe input was not already set
+                        userInput.pipeType = 'r'; // pipe input is a sequence
+                    }else{ // input is a regular file
+                        optind--;
+                        for( ;optind < argc && *argv[optind] != '-' && !isInt(argv[optind]); optind++){
+                            
+                            ifFileExists(argv[optind]);
+                            userInput.inReads.push_back(argv[optind]);
+                        }
+                    }
+                    break;
                 case 'v': // software version
                     printf("kcount v%s\n", version.c_str());
                     printf("Giulio Formenti giulio.formenti@gmail.com\n");
@@ -168,7 +159,7 @@ int main(int argc, char **argv) {
             
         }
         
-        if (userInput.iReadFileArg.size() == 0) {
+        if (userInput.inReads.size() == 0) {
             fprintf(stderr, "At least one input file required (-f).\n");
             return EXIT_FAILURE;
         }
@@ -230,7 +221,7 @@ int main(int argc, char **argv) {
                     }else{ // input is a regular file
                         
                         ifFileExists(optarg);
-                        userInput.iSeqFileArg = optarg;
+                        userInput.inSequence = optarg;
                         
                     }
                     
@@ -263,7 +254,7 @@ int main(int argc, char **argv) {
             
         }
         
-        if (userInput.iSeqFileArg == "") {
+        if (userInput.inSequence == "") {
             fprintf(stderr, "At least one database required (-d).\n");
             return EXIT_FAILURE;
         }
@@ -328,7 +319,7 @@ int main(int argc, char **argv) {
                         for( ;optind < argc && *argv[optind] != '-' && !isInt(argv[optind]); optind++){
                             
                             ifFileExists(argv[optind]);
-                            userInput.iReadFileArg.push_back(argv[optind]);
+                            userInput.inReads.push_back(argv[optind]);
                             
                         }
                         
@@ -346,7 +337,7 @@ int main(int argc, char **argv) {
                     break;
                     
                 case 'h': // help
-                    printf("kcount load [options]\n");
+                    printf("kcount union [options]\n");
                     printf("\nOptions:\n");
                     printf("\t-d --databases kmer database to merge.\n");
                     printf("\t-j --threads <n> numbers of threads (default: max).\n");
@@ -363,7 +354,7 @@ int main(int argc, char **argv) {
             
         }
         
-        if (userInput.iReadFileArg.size() < 2) {
+        if (userInput.inReads.size() < 2) {
             fprintf(stderr, "At least two databases required (-d).\n");
             return EXIT_FAILURE;
         }
@@ -455,10 +446,9 @@ int main(int argc, char **argv) {
     }
         
 	Input in;
-	
 	in.load(userInput); // load user input
-	
 	lg.verbose("Loaded user input");
+    maxMem = (userInput.maxMem == 0 ? get_mem_total(3) * 0.9 : userInput.maxMem); // set memory limit
     
     threadPool.init(maxThreads); // initialize threadpool
     
