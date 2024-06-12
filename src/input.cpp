@@ -78,7 +78,7 @@ void Input::read(short unsigned int mode) { // reads the actual input and perfor
                 unsigned int numFiles = userInput.inReads.size();
                 
                 for (unsigned int i = 0; i < numFiles; ++i) // for each input read file
-                    loadKmers(userInput, &kcount, 'r', i); // specialized function to process reads into kmers as hashes
+                    loadKmers(userInput, kcount, 'r', i); // specialized function to process reads into kmers as hashes
                 
                 lg.verbose("Reads loaded.");
                 kcount.finalize();
