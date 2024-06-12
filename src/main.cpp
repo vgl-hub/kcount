@@ -51,7 +51,7 @@ int main(int argc, char **argv) {
     
     std::string cmd;
 
-    UserInputKmap userInput; // initialize input object
+    UserInputKcount userInput; // initialize input object
     
     if(argc>1 && strcmp(argv[1],"count") == 0) {
         

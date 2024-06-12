@@ -32,7 +32,7 @@
 #include "kmer.h"
 #include "kcount.h"
 
-void Input::load(UserInputKmap userInput) { // a specialized userInput loading function
+void Input::load(UserInputKcount userInput) { // a specialized userInput loading function
     
     this->userInput = userInput;
     
@@ -70,7 +70,7 @@ void Input::read(short unsigned int mode) { // reads the actual input and perfor
             
         case 0: { // reads input reads and generates the kmer db
             
-            Kmap<UserInputKmap, uint8_t, uint32_t> kcount(userInput); // a new empty kmerdb with the specified kmer length
+            Kmap<KDB, UserInputKcount, uint8_t, uint32_t> kcount(userInput); // a new empty kmerdb with the specified kmer length
             
             if (userInput.inReads.size() > 0) {
                 
@@ -100,7 +100,7 @@ void Input::read(short unsigned int mode) { // reads the actual input and perfor
             getline(file, line);
             file.close();
             
-            Kmap<UserInputKmap, uint32_t, uint64_t> kcount(userInput); // a new empty kmerdb with the specified kmer length
+            Kmap<KDB, UserInputKcount, uint8_t, uint32_t> kcount(userInput); // a new empty kmerdb with the specified kmer length
             lg.verbose("Kmer DB loaded");
             loadDB();
             kcount.loadHighCopyKmers();
@@ -141,7 +141,7 @@ void Input::read(short unsigned int mode) { // reads the actual input and perfor
                 exit(1);
             }
             
-            Kmap<UserInputKmap, uint32_t, uint64_t> kcount(userInput); // a new empty kmerdb with the specified kmer length
+            Kmap<KDB, UserInputKcount, uint8_t, uint32_t> kcount(userInput); // a new empty kmerdb with the specified kmer length
             
             lg.verbose("Kmer object generated. Merging.");
             kcount.kunion(); // union set

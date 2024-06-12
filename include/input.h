@@ -1,17 +1,17 @@
 #ifndef INPUT_H
 #define INPUT_H
 
-struct UserInputKmap : UserInput {
+struct UserInputKcount : UserInput {
 
 };
 
 class Input {
     
-    UserInputKmap userInput;
+    UserInputKcount userInput;
     
 public:
     
-    void load(UserInputKmap userInput);
+    void load(UserInputKcount userInput);
     
     void loadDB();
     

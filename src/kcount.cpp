@@ -20,6 +20,3 @@
 #include "kmer.h"
 
 #include "kcount.h"
-
-
-// the kmer counting functionalities are at present all in the library (gfalibs/kmer.h)
