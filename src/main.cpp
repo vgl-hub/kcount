@@ -32,7 +32,6 @@ int verbose_flag;
 int outBubbles_flag;
 int stats_flag;
 int discoverPaths_flag;
-int outFile_flag;
 int sortAlignment_flag;
 int terminalAlignments_flag;
 int maxThreads = 0;
@@ -120,7 +119,6 @@ int main(int argc, char **argv) {
                     
                 case 'o': // handle output (file or stdout)
                     userInput.outFile = optarg;
-                    outFile_flag = 1;
                     break;
                     
                 case 'r': // input reads
@@ -212,28 +210,26 @@ int main(int argc, char **argv) {
                     
                     break;
                     
-                case 'd': // input sequence
+                case 'd': // input DBs
                     
                     if (isPipe && userInput.pipeType == 'n') { // check whether input is from pipe and that pipe input was not already set
-                        
                         userInput.pipeType = 'f'; // pipe input is a sequence
-                        
                     }else{ // input is a regular file
                         
-                        ifFileExists(optarg);
-                        userInput.inSequence = optarg;
-                        
+                        optind--;
+                        for( ;optind < argc && *argv[optind] != '-' && !isInt(argv[optind]); optind++){
+                            
+                            ifFileExists(argv[optind]);
+                            userInput.kmerDB.push_back(argv[optind]);
+                        }
                     }
-                    
                     break;
-                    
                 case 'j': // max threads
                     maxThreads = atoi(optarg);
                     break;
                     
                 case 'o': // handle output (file or stdout)
                     userInput.outFile = optarg;
-                    outFile_flag = 1;
                     break;
                     
                 case 'h': // help
@@ -254,8 +250,8 @@ int main(int argc, char **argv) {
             
         }
         
-        if (userInput.inSequence == "") {
-            fprintf(stderr, "At least one database required (-d).\n");
+        if (userInput.kmerDB.size() != 1) {
+            fprintf(stderr, "One database required (-d).\n");
             return EXIT_FAILURE;
         }
         
@@ -307,33 +303,26 @@ int main(int argc, char **argv) {
                     
                     break;
                     
-                case 'd': // input sequence
+                case 'd': // input DBs
                     
                     if (isPipe && userInput.pipeType == 'n') { // check whether input is from pipe and that pipe input was not already set
-                        
                         userInput.pipeType = 'f'; // pipe input is a sequence
-                        
                     }else{ // input is a regular file
                         
                         optind--;
                         for( ;optind < argc && *argv[optind] != '-' && !isInt(argv[optind]); optind++){
                             
                             ifFileExists(argv[optind]);
-                            userInput.inReads.push_back(argv[optind]);
-                            
+                            userInput.kmerDB.push_back(argv[optind]);
                         }
-                        
                     }
-                    
                     break;
-                    
                 case 'j': // max threads
                     maxThreads = atoi(optarg);
                     break;
                     
                 case 'o': // handle output (file or stdout)
                     userInput.outFile = optarg;
-                    outFile_flag = 1;
                     break;
                     
                 case 'h': // help
@@ -354,7 +343,7 @@ int main(int argc, char **argv) {
             
         }
         
-        if (userInput.inReads.size() < 2) {
+        if (userInput.kmerDB.size() < 2) {
             fprintf(stderr, "At least two databases required (-d).\n");
             return EXIT_FAILURE;
         }
@@ -410,7 +399,6 @@ int main(int argc, char **argv) {
                     
                 case 'o': // handle output (file or stdout)
                     userInput.outFile = optarg;
-                    outFile_flag = 1;
                     break;
                     
                 case 'v': // software version

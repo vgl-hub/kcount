@@ -3,9 +3,6 @@
 
 struct UserInputKmap : UserInput {
 
-    unsigned short int kmerLen = 21; // default
-    std::string outFile;
-
 };
 
 class Input {
@@ -15,6 +12,8 @@ class Input {
 public:
     
     void load(UserInputKmap userInput);
+    
+    void loadDB();
     
     void read(short unsigned int mode);
     

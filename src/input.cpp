@@ -38,79 +38,96 @@ void Input::load(UserInputKmap userInput) { // a specialized userInput loading f
     
 }
 
+void Input::loadDB() {
+    
+    if (userInput.kmerDB.size() == 1){
+        userInput.prefix = userInput.kmerDB[0]; // access database
+        std::ifstream file;
+        file.open(userInput.prefix + "/.index"); // update kmer length
+        std::string line;
+        getline(file, line);
+        file.close();
+        userInput.kmerLen = stoi(line);
+    }else if (userInput.kmerDB.size() > 1) {
+        fprintf(stderr, "More than one DB provided. Merge them first. Exiting.\n");
+        exit(EXIT_FAILURE);
+    }else{
+        fprintf(stderr, "Cannot load DB input. Exiting.\n");
+        exit(EXIT_FAILURE);
+    }
+    
+}
+
 void Input::read(short unsigned int mode) { // reads the actual input and performing the tasks
+    
+    if (userInput.outFile.find(".kc") != std::string::npos)
+        userInput.prefix = userInput.outFile;
+    
+    if (userInput.prefix != ".")
+        make_dir(userInput.prefix.c_str());
     
     switch (mode) {
             
-        case 0: // reads input reads and generates the kmer db
-            
-        {
+        case 0: { // reads input reads and generates the kmer db
             
             Kmap<UserInputKmap, uint8_t, uint32_t> kcount(userInput); // a new empty kmerdb with the specified kmer length
             
-            lg.verbose("Loading input sequences");
-            unsigned int numFiles = userInput.inReads.size();
-            
-            for (unsigned int i = 0; i < numFiles; ++i) // for each input read file
-                loadKmers(userInput, &kcount, 'r', i); // specialized function to process reads into kmers as hashes
-            
-            lg.verbose("Reads loaded.");
-            kcount.finalize();
-            
+            if (userInput.inReads.size() > 0) {
+                
+                lg.verbose("Loading input sequences");
+                unsigned int numFiles = userInput.inReads.size();
+                
+                for (unsigned int i = 0; i < numFiles; ++i) // for each input read file
+                    loadKmers(userInput, &kcount, 'r', i); // specialized function to process reads into kmers as hashes
+                
+                lg.verbose("Reads loaded.");
+                kcount.finalize();
+            }else{
+                fprintf(stderr, "Reads not provided. Exiting.\n");
+                exit(EXIT_FAILURE);
+            }
             kcount.loadHighCopyKmers();
-            kcount.report(userInput); // output
+            kcount.report(); // output
             kcount.cleanup(); // delete tmp files
             break;
-            
         }
         
-        case 1: // reads an existing kmerdb
-            
-        {
+        case 1: { // reads an existing kmerdb
             
             std::ifstream file;
-            
             file.open(userInput.inSequence + "/.index"); // reads the kmer length from the index file
             std::string line;
-            
             getline(file, line);
             file.close();
             
             Kmap<UserInputKmap, uint32_t, uint64_t> kcount(userInput); // a new empty kmerdb with the specified kmer length
-            
-            lg.verbose("Kmer object generated");
-            
-            kcount.load(userInput); // loads kmers into the new kmerdb
-            
-            kcount.stats();
-            
-            kcount.report(userInput); // output
-            
+            lg.verbose("Kmer DB loaded");
+            loadDB();
+            kcount.loadHighCopyKmers();
+            kcount.report(); // output
+            kcount.cleanup(); // delete tmp files
             break;
             
         }
             
-        case 2: // union of multiple kmerdbs
-            
-        {
+        case 2: { // union of multiple kmerdbs
             
             std::ifstream file;
             
             lg.verbose("Merging input databases");
-            unsigned int numFiles = userInput.inReads.size(); // number of input kmerdbs
+            unsigned int numFiles = userInput.kmerDB.size(); // number of input kmerdbs
             
-            short unsigned int k = 0;
+            uint8_t k = 0;
             
-            for (unsigned int i = 0; i < numFiles; i++) {  // reads the kmer length from the index files checking consistency between kmerdbs
+            for (uint16_t i = 0; i < numFiles; i++) {  // reads the kmer length from the index files checking consistency between kmerdbs
                 
-                file.open(userInput.inReads[i] + "/.index");
+                file.open(userInput.kmerDB[i] + "/.index");
                 std::string line;
                 
                 getline(file, line);
                 file.close();
                 
-                if (k == 0)
-                    k = stoi(line);
+                k = stoi(line);
                 
                 if (k != stoi(line)) {
                     fprintf(stderr, "Cannot merge databases with different kmer length\n");
@@ -127,20 +144,14 @@ void Input::read(short unsigned int mode) { // reads the actual input and perfor
             Kmap<UserInputKmap, uint32_t, uint64_t> kcount(userInput); // a new empty kmerdb with the specified kmer length
             
             lg.verbose("Kmer object generated. Merging.");
-            
-            kcount.kunion(userInput); // union set
-            
-            kcount.report(userInput); // output
-            
+            kcount.kunion(); // union set
+            kcount.report(); // output
             break;
-            
         }
             
         default:
-            
             fprintf(stderr, "Invalid mode\n");
             exit(1);
-        
     }
     
 }
