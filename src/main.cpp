@@ -58,7 +58,7 @@ int main(int argc, char **argv) {
         mode = 0;
         
         static struct option long_options[] = { // struct mapping long options
-            {"input-sequences", required_argument, 0, 'f'},
+            {"input-sequences", required_argument, 0, 'r'},
             {"kmer-length", required_argument, 0, 'k'},
             {"out-format", required_argument, 0, 'o'},
             
@@ -141,7 +141,7 @@ int main(int argc, char **argv) {
                 case 'h': // help
                     printf("kcount count [options]\n");
                     printf("\nOptions:\n");
-                    printf("\t-f --input-sequences sequence input files (fasta,fastq).\n");
+                    printf("\t-r --input-sequences sequence input files (fasta,fastq).\n");
                     printf("\t-k --kmer-length length of kmers.\n");
                     printf("\t-j --threads <n> numbers of threads (default: max).\n");
                     printf("\t-o --out-format generates various kinds of outputs (currently supported: .hist .kc).\n");
