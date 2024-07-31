@@ -36,6 +36,9 @@ int sortAlignment_flag;
 int terminalAlignments_flag;
 int maxThreads = 0;
 
+uint32_t k = 300;
+uint8_t maxK = 31;
+
 std::mutex mtx;
 ThreadPool<std::function<bool()>> threadPool;
 Log lg;
