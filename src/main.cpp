@@ -36,8 +36,8 @@ int sortAlignment_flag;
 int terminalAlignments_flag;
 int maxThreads = 0;
 
-uint32_t k = 300;
-uint8_t maxK = 31;
+uint32_t kLen = 63;
+uint8_t kPrefixLen = 31;
 
 std::mutex mtx;
 ThreadPool<std::function<bool()>> threadPool;
@@ -114,6 +114,9 @@ int main(int argc, char **argv) {
                     }
                     
                     userInput.kmerLen = atoi(optarg);
+                    kLen = userInput.kmerLen;
+                    if (kLen < 31)
+                        kPrefixLen = kLen;
                     break;
                     
                 case 'j': // max threads
@@ -145,7 +148,7 @@ int main(int argc, char **argv) {
                     printf("kcount count [options]\n");
                     printf("\nOptions:\n");
                     printf("\t-r --input-sequences sequence input files (fasta,fastq).\n");
-                    printf("\t-k --kmer-length length of kmers.\n");
+                    printf("\t-k --kmer-length length of kmers (default: 63).\n");
                     printf("\t-j --threads <n> numbers of threads (default: max).\n");
                     printf("\t-o --out-format generates various kinds of outputs (currently supported: .hist .kc).\n");
                     printf("\t--cmd print $0 to stdout.\n");
