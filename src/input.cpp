@@ -48,6 +48,9 @@ void Input::loadDB() {
         getline(file, line);
         file.close();
         userInput.kmerLen = stoi(line);
+        kLen = userInput.kmerLen;
+        if (kLen < 31)
+            kPrefixLen = kLen;
     }else if (userInput.kmerDB.size() > 1) {
         fprintf(stderr, "More than one DB provided. Merge them first. Exiting.\n");
         exit(EXIT_FAILURE);
@@ -136,10 +139,15 @@ void Input::read(short unsigned int mode) { // reads the actual input and perfor
                 
             }
             
-            if (k == 0 || k > 32) {
-                fprintf(stderr, "Invalid kmer length\n");
+            if (k == 0) {
+                fprintf(stderr, "Invalid kmer length (0)\n");
                 exit(1);
             }
+            
+            userInput.kmerLen = k;
+            kLen = userInput.kmerLen;
+            if (kLen < 31)
+                kPrefixLen = kLen;
             
             KDB kcount(userInput); // a new empty kmerdb with the specified kmer length
             
