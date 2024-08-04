@@ -20,7 +20,6 @@ jobs:
             command: ".github/workflows/val.bat"
       fail-fast: false
     runs-on: ${{ matrix.os }}
-    using: 'node20'
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
