@@ -89,7 +89,6 @@ void Input::read(short unsigned int mode) { // reads the actual input and perfor
                 fprintf(stderr, "Reads not provided. Exiting.\n");
                 exit(EXIT_FAILURE);
             }
-            kcount.loadHighCopyKmers();
             kcount.report(); // output
             kcount.cleanup(); // delete tmp files
             break;
