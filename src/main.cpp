@@ -246,6 +246,7 @@ int main(int argc, char **argv) {
                     printf("\t-d --database kmer database to load.\n");
                     printf("\t-j --threads <n> numbers of threads (default: max).\n");
                     printf("\t-o --out-format generates various kinds of outputs (currently supported: .hist .kc).\n");
+                    printf("\t--verbose verbose output.\n");
                     printf("\t--cmd print $0 to stdout.\n");
                     exit(0);
             }
@@ -339,6 +340,7 @@ int main(int argc, char **argv) {
                     printf("\t-d --databases kmer database to merge.\n");
                     printf("\t-j --threads <n> numbers of threads (default: max).\n");
                     printf("\t-o --out-format generates various kinds of outputs (currently supported: .hist .kc).\n");
+                    printf("\t--verbose verbose output.\n");
                     printf("\t--cmd print $0 to stdout.\n");
                     exit(0);
             }
