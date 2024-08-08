@@ -103,9 +103,9 @@ void Input::read() { // reads the actual input and performing the tasks
             file.close();
             
             KDB kcount(userInput); // a new empty kmerdb with the specified kmer length
-            lg.verbose("Kmer DB loaded");
             loadDB();
             kcount.loadHighCopyKmers();
+            lg.verbose("Kmer DB loaded");
             kcount.report(); // output
             kcount.cleanup(); // delete tmp files
             break;
