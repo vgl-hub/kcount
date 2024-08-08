@@ -15,7 +15,7 @@ public:
     
     void loadDB();
     
-    void read(short unsigned int mode);
+    void read();
     
 };
 

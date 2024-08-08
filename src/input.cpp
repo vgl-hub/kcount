@@ -61,7 +61,7 @@ void Input::loadDB() {
     
 }
 
-void Input::read(short unsigned int mode) { // reads the actual input and performing the tasks
+void Input::read() { // reads the actual input and performing the tasks
     
     if (userInput.outFile.find(".kc") != std::string::npos)
         userInput.prefix = userInput.outFile;
@@ -69,7 +69,7 @@ void Input::read(short unsigned int mode) { // reads the actual input and perfor
     if (userInput.prefix != ".")
         make_dir(userInput.prefix.c_str());
     
-    switch (mode) {
+    switch (userInput.mode) {
             
         case 0: { // reads input reads and generates the kmer db
             
