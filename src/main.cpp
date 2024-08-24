@@ -39,7 +39,6 @@ int maxThreads = 0;
 
 uint32_t kLen = 63;
 uint8_t kPrefixLen = 31;
-Buf2bit<> *seqBuf, *seqBuf2;
 
 std::mutex mtx;
 ThreadPool<std::function<bool()>> threadPool;
