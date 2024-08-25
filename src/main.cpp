@@ -38,7 +38,7 @@ int terminalAlignments_flag;
 int maxThreads = 0;
 
 uint32_t kLen = 63;
-uint8_t kPrefixLen = 31;
+uint8_t kPrefixLen = 5;
 
 std::mutex mtx;
 ThreadPool<std::function<bool()>> threadPool;
