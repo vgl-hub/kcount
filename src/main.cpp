@@ -144,8 +144,8 @@ int main(int argc, char **argv) {
                         
                         userInput.kmerLen = atoi(optarg);
                         kLen = userInput.kmerLen;
-                        if (kLen < 31)
-                            kPrefixLen = kLen;
+//                        if (kLen < 31)
+//                            kPrefixLen = kLen;
                         break;
                         
                     case 'j': // max threads
