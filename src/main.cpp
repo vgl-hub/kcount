@@ -37,9 +37,6 @@ int sortAlignment_flag;
 int terminalAlignments_flag;
 int maxThreads = 0;
 
-uint32_t kLen = 63;
-uint8_t kPrefixLen = 21;
-
 std::mutex mtx;
 ThreadPool<std::function<bool()>> threadPool;
 Log lg;
@@ -142,10 +139,7 @@ int main(int argc, char **argv) {
                             return EXIT_FAILURE;
                         }
                         
-                        userInput.kmerLen = atoi(optarg);
-                        kLen = userInput.kmerLen;
-//                        if (kLen < 31)
-//                            kPrefixLen = kLen;
+                        userInput.kLen = atoi(optarg);
                         break;
                         
                     case 'j': // max threads
