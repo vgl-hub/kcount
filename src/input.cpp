@@ -47,7 +47,7 @@ void Input::loadDB() {
         std::string line;
         getline(file, line);
         file.close();
-        userInput.kLen = stoi(line);
+        userInput.kLen = stol(line);
         if (userInput.kLen < userInput.kPrefixLen)
             userInput.kPrefixLen = userInput.kLen;
     }else if (userInput.kmerDB.size() > 1) {
