@@ -139,7 +139,7 @@ int main(int argc, char **argv) {
                             return EXIT_FAILURE;
                         }
                         
-                        userInput.kLen = strtol(optarg);
+                        userInput.kLen = atol(optarg);
                         if (userInput.kLen < 31)
                             userInput.kPrefixLen = userInput.kLen;
                         break;
