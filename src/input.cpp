@@ -120,7 +120,7 @@ void Input::read() { // reads the actual input and performing the tasks
             lg.verbose("Merging input databases");
             unsigned int numFiles = userInput.kmerDB.size(); // number of input kmerdbs
             
-            uint8_t k = 0;
+            uint32_t k = 0;
             
             for (uint16_t i = 0; i < numFiles; i++) {  // reads the kmer length from the index files checking consistency between kmerdbs
                 
@@ -130,18 +130,22 @@ void Input::read() { // reads the actual input and performing the tasks
                 getline(file, line);
                 file.close();
                 
-                k = stoi(line);
+                k = stol(line);
                 
-                if (k != stoi(line)) {
+                if (k != stol(line)) {
                     fprintf(stderr, "Cannot merge databases with different kmer length\n");
-                    exit(1);
+                    exit(EXIT_FAILURE);
                 }
             }
             
             if (k == 0) {
                 fprintf(stderr, "Invalid kmer length (0)\n");
-                exit(1);
+                exit(EXIT_FAILURE);
             }
+            
+            userInput.kLen = k;
+            if (userInput.kLen < userInput.kPrefixLen)
+                userInput.kPrefixLen = userInput.kLen;
             
             KDB kcount(userInput); // a new empty kmerdb with the specified kmer length
             
@@ -153,7 +157,7 @@ void Input::read() { // reads the actual input and performing the tasks
             
         default:
             fprintf(stderr, "Invalid mode\n");
-            exit(1);
+            exit(EXIT_FAILURE);
     }
     
 }
