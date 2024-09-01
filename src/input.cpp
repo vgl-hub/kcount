@@ -106,6 +106,7 @@ void Input::read() { // reads the actual input and performing the tasks
             loadDB();
             kcount.loadHighCopyKmers();
             lg.verbose("Loaded high copy kmers");
+            kcount.computeStats();
             kcount.report(); // output
             kcount.cleanup(); // delete tmp files
             break;
@@ -135,17 +136,12 @@ void Input::read() { // reads the actual input and performing the tasks
                     fprintf(stderr, "Cannot merge databases with different kmer length\n");
                     exit(1);
                 }
-                
             }
             
             if (k == 0) {
                 fprintf(stderr, "Invalid kmer length (0)\n");
                 exit(1);
             }
-            
-            userInput.kLen = k;
-            if (userInput.kLen < userInput.kPrefixLen)
-                userInput.kPrefixLen = userInput.kLen;
             
             KDB kcount(userInput); // a new empty kmerdb with the specified kmer length
             

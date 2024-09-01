@@ -83,6 +83,7 @@ int main(int argc, char **argv) {
             static struct option long_options[] = { // struct mapping long options
                 {"input-sequences", required_argument, 0, 'r'},
                 {"kmer-length", required_argument, 0, 'k'},
+                {"smer-length", required_argument, 0, 's'},
                 {"out-format", required_argument, 0, 'o'},
                 
                 {"threads", required_argument, 0, 'j'},
@@ -98,7 +99,7 @@ int main(int argc, char **argv) {
                 
                 int option_index = 1;
                 
-                c = getopt_long(argc, argv, "-:k:j:o:r:h",
+                c = getopt_long(argc, argv, "-:k:s:j:o:r:h",
                                 long_options, &option_index);
                 
                 if (c == -1) { // exit the loop if run out of options
@@ -143,6 +144,21 @@ int main(int argc, char **argv) {
                         if (userInput.kLen < userInput.kPrefixLen)
                             userInput.kPrefixLen = userInput.kLen;
                         break;
+                    case 's': // kmer length
+                        
+                        if (!isNumber(optarg)) {
+                            fprintf(stderr, "input '%s' to option -%c must be a number\n", optarg, optopt);
+                            return EXIT_FAILURE;
+                        }
+                        
+                        userInput.sLen = atoi(optarg);
+                        if (userInput.sLen > 8 || userInput.sLen <= 0) {
+                            fprintf(stderr, "input '%s' to option -%c must be 0-8\n", optarg, optopt);
+                            return EXIT_FAILURE;
+                        }
+                        if (userInput.kLen < userInput.sLen)
+                            userInput.sLen = userInput.kLen;
+                        break;
                         
                     case 'j': // max threads
                         maxThreads = atoi(optarg);
@@ -173,7 +189,8 @@ int main(int argc, char **argv) {
                         printf("kcount count [options]\n");
                         printf("\nOptions:\n");
                         printf("\t-r --input-sequences sequence input files (fasta,fastq).\n");
-                        printf("\t-k --kmer-length length of kmers (default: 63).\n");
+                        printf("\t-k --kmer-length length of kmers (default: 21).\n");
+                        printf("\t-s --smer-length length of smers (e.g. minimizers) (default: 7).\n");
                         printf("\t-j --threads <n> numbers of threads (default: max).\n");
                         printf("\t-o --out-format generates various kinds of outputs (currently supported: .hist .kc).\n");
                         printf("\t--verbose verbose output.\n");
