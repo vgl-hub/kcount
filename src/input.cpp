@@ -50,6 +50,8 @@ void Input::loadDB() {
         userInput.kLen = stol(line);
         if (userInput.kLen < userInput.kPrefixLen)
             userInput.kPrefixLen = userInput.kLen;
+        else
+            userInput.kPrefixLen = std::min(31,userInput.kLen)
     }else if (userInput.kmerDB.size() > 1) {
         fprintf(stderr, "More than one DB provided. Merge them first. Exiting.\n");
         exit(EXIT_FAILURE);
@@ -146,6 +148,8 @@ void Input::read() { // reads the actual input and performing the tasks
             userInput.kLen = k;
             if (userInput.kLen < userInput.kPrefixLen)
                 userInput.kPrefixLen = userInput.kLen;
+            else
+                userInput.kPrefixLen = std::min(31,userInput.kLen)
             
             KDB kcount(userInput); // a new empty kmerdb with the specified kmer length
             

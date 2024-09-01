@@ -143,6 +143,8 @@ int main(int argc, char **argv) {
                         userInput.kLen = atol(optarg);
                         if (userInput.kLen < userInput.kPrefixLen)
                             userInput.kPrefixLen = userInput.kLen;
+                        else
+                            userInput.kPrefixLen = std::min(31,userInput.kLen)
                         break;
                     case 's': // kmer length
                         
