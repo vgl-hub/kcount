@@ -154,8 +154,8 @@ int main(int argc, char **argv) {
                         }
                         
                         userInput.sLen = atoi(optarg);
-                        if (userInput.sLen > 8 || userInput.sLen <= 0) {
-                            fprintf(stderr, "input '%s' to option -%c must be 0-8\n", optarg, optopt);
+                        if (userInput.sLen < 8 || userInput.sLen > 32) {
+                            fprintf(stderr, "input '%s' to option -%c must be 8-32\n", optarg, optopt);
                             return EXIT_FAILURE;
                         }
                         if (userInput.kLen < userInput.sLen)
