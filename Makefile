@@ -23,20 +23,20 @@ OBJECTS := $(addprefix $(BINDIR)/, $(SOURCES))
 head: $(OBJECTS) gfalibs | $(BUILD)
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $(BUILD)/$(TARGET) $(wildcard $(BINDIR)/*) $(GFALIBS_DIR)/*.o $(LIBS)
 
-debug: CXXFLAGS += -DDEBUG
-debug: CCFLAGS += -DDEBUG
+debug: CXXFLAGS += -DDEBUG -DEBUG_SCAN
+debug: CCFLAGS += -DDEBUG -DEBUG_SCAN
 debug: head
 
 all: head validate
 
 $(OBJS): %: $(BINDIR)/%
 	@
-$(BINDIR)%: $(SOURCE)/%.cpp $(INCLUDE)/%.h $(GFALIBS_DIR)/include/*.h Makefile | $(BINDIR)
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) -c $< -o $@
+$(BINDIR)%: $(SOURCE)/%.cpp $(INCLUDE)/%.h $(GFALIBS_DIR)/include/*.h $(GFALIBS_DIR)/src/MinScan.cpp Makefile | $(BINDIR)
+	$(CXX) $(CXXFLAGS) $(CCFLAGS) $(LDFLAGS) -c $< -o $@
 
 .PHONY: gfalibs
 gfalibs: 
-	$(MAKE) -j -C $(GFALIBS_DIR) CXXFLAGS="$(CXXFLAGS)"
+	$(MAKE) -j -C $(GFALIBS_DIR) CXXFLAGS="$(CXXFLAGS)" CCFLAGS="$(CCFLAGS)"
 	
 validate: | $(BUILD)
 	$(CXX) $(CXXFLAGS) -o $(BUILD)/$(TARGET)-$(TEST_TARGET) $(SOURCE)/$(TEST_TARGET).cpp $(LIBS)
