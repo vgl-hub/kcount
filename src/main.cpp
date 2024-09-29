@@ -141,12 +141,8 @@ int main(int argc, char **argv) {
                         }
                         
                         userInput.kLen = atol(optarg);
-                        if (userInput.kLen < userInput.kPrefixLen)
-                            userInput.kPrefixLen = userInput.kLen;
-                        else
-                            userInput.kPrefixLen = std::min((uint32_t)31,userInput.kLen);
                         break;
-                    case 's': // kmer length
+                    case 's': // smer length
                         
                         if (!isNumber(optarg)) {
                             fprintf(stderr, "input '%s' to option -%c must be a number\n", optarg, optopt);
