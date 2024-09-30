@@ -2,4 +2,3 @@
 	path = gfalibs
 	url = https://github.com/vgl-hub/gfalibs.git
     ignore = untracked
-    ignore = dirty
