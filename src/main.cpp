@@ -73,7 +73,7 @@ int main(int argc, char **argv) {
     if (got != string_to_case.end()) {
         userInput.mode = got->second;
     }else{
-        fprintf(stderr, "mode %s does not exist. Terminating\n", argv[1]);
+        fprintf(stderr, "mode %s does not exist. Terminating.\n", argv[1]);
         return EXIT_FAILURE;
     }
     
@@ -162,10 +162,20 @@ int main(int argc, char **argv) {
                         maxThreads = atoi(optarg);
                         break;
                         
-                    case 'o': // handle output (file or stdout)
-                        userInput.outFile = optarg;
-                        break;
-                        
+					case 'o': // handle output (file or stdout)
+						
+						const static phmap::parallel_flat_hash_set<std::string> string_to_case{ // different outputs available
+						"hist",
+						"kc"
+						};
+						userInput.outFile = optarg;
+						std::string ext = getFileExt("." + userInput.outFile);
+						auto got = string_to_case.find(ext);
+						if (got == string_to_case.end()) {
+							fprintf(stderr, "Unrecognized ouput extension: %s. Terminating.\n", ext.c_str());
+							return EXIT_FAILURE;
+						}
+						break;
                     case 'r': // input reads
                         if (isPipe && userInput.pipeType == 'n') { // check whether input is from pipe and that pipe input was not already set
                             userInput.pipeType = 'r'; // pipe input is a sequence

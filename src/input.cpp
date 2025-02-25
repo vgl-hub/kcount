@@ -33,9 +33,7 @@
 #include "kcount.h"
 
 void Input::load(UserInputKcount userInput) { // a specialized userInput loading function
-    
     this->userInput = userInput;
-    
 }
 
 void Input::loadDB() {
@@ -55,7 +53,6 @@ void Input::loadDB() {
         fprintf(stderr, "Cannot load DB input. Exiting.\n");
         exit(EXIT_FAILURE);
     }
-    
 }
 
 void Input::read() { // reads the actual input and performing the tasks
@@ -90,7 +87,6 @@ void Input::read() { // reads the actual input and performing the tasks
             kcount.cleanup(); // delete tmp files
             break;
         }
-        
         case 1: { // reads an existing kmerdb
             
             std::ifstream file;
@@ -98,7 +94,7 @@ void Input::read() { // reads the actual input and performing the tasks
             std::string line;
             getline(file, line);
             file.close();
-            
+
             KDB kcount(userInput); // a new empty kmerdb with the specified kmer length
             lg.verbose("Kmer DB created");
             loadDB();
@@ -106,13 +102,11 @@ void Input::read() { // reads the actual input and performing the tasks
             kcount.report(); // output
             kcount.cleanup(); // delete tmp files
             break;
-            
         }
             
         case 2: { // union of multiple kmerdbs
             
             std::ifstream file;
-            
             lg.verbose("Merging input databases");
             unsigned int numFiles = userInput.kmerDB.size(); // number of input kmerdbs
             
@@ -122,10 +116,8 @@ void Input::read() { // reads the actual input and performing the tasks
                 
                 file.open(userInput.kmerDB[i] + "/.index");
                 std::string line;
-                
                 getline(file, line);
                 file.close();
-                
                 k = stol(line);
                 
                 if (k != stol(line)) {
@@ -133,25 +125,20 @@ void Input::read() { // reads the actual input and performing the tasks
                     exit(EXIT_FAILURE);
                 }
             }
-            
             if (k == 0) {
                 fprintf(stderr, "Invalid kmer length (0)\n");
                 exit(EXIT_FAILURE);
             }
             
             userInput.kLen = k;
-            
             KDB kcount(userInput); // a new empty kmerdb with the specified kmer length
-            
             lg.verbose("Kmer object generated. Merging.");
             kcount.kunion(); // union set
             kcount.report(); // output
             break;
         }
-            
         default:
             fprintf(stderr, "Invalid mode\n");
             exit(EXIT_FAILURE);
     }
-    
 }
