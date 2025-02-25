@@ -162,11 +162,11 @@ int main(int argc, char **argv) {
                         maxThreads = atoi(optarg);
                         break;
                         
-					case 'o': // handle output (file or stdout)
+					case 'o': { // handle output (file or stdout)
 						
 						const static phmap::parallel_flat_hash_set<std::string> string_to_case{ // different outputs available
-						"hist",
-						"kc"
+							"hist",
+							"kc"
 						};
 						userInput.outFile = optarg;
 						std::string ext = getFileExt("." + userInput.outFile);
@@ -176,6 +176,7 @@ int main(int argc, char **argv) {
 							return EXIT_FAILURE;
 						}
 						break;
+					}
                     case 'r': // input reads
                         if (isPipe && userInput.pipeType == 'n') { // check whether input is from pipe and that pipe input was not already set
                             userInput.pipeType = 'r'; // pipe input is a sequence
