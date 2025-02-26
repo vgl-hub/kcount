@@ -85,6 +85,7 @@ int main(int argc, char **argv) {
                 {"kmer-length", required_argument, 0, 'k'},
                 {"smer-length", required_argument, 0, 's'},
                 {"out-format", required_argument, 0, 'o'},
+				{"hashing-threads",required_argument, 0, 0},
                 
                 {"threads", required_argument, 0, 'j'},
                 {"verbose", no_argument, &verbose_flag, 1},
@@ -102,10 +103,8 @@ int main(int argc, char **argv) {
                 c = getopt_long(argc, argv, "-:k:s:j:o:r:h",
                                 long_options, &option_index);
                 
-                if (c == -1) { // exit the loop if run out of options
+                if (c == -1) // exit the loop if run out of options
                     break;
-                    
-                }
                 
                 switch (c) {
                     case ':': // handle options without arguments
@@ -122,8 +121,8 @@ int main(int argc, char **argv) {
                         
                     case 0: // case for long options without short options
                         
-                        //                if (strcmp(long_options[option_index].name,"line-length") == 0)
-                        //                  splitLength = atoi(optarg);
+						if (strcmp(long_options[option_index].name,"hashing-threads") == 0)
+						  userInput.hashThreads = atoi(optarg);
                         
                         break;
                     case '?': // unrecognized option
@@ -202,6 +201,7 @@ int main(int argc, char **argv) {
                         printf("\t-s --smer-length length of smers (e.g. minimizers) (default: 7).\n");
                         printf("\t-j --threads <n> numbers of threads (default: max).\n");
                         printf("\t-o --out-format generates various kinds of outputs (currently supported: .hist .kc).\n");
+						printf("\t--hashing-threads number of hashing threads per buffer\n");
                         printf("\t--verbose verbose output.\n");
                         printf("\t--cmd print $0 to stdout.\n");
                         exit(0);
