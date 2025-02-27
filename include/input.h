@@ -3,6 +3,7 @@
 
 struct UserInputKcount : UserInput {
 	uint32_t hashThreads = 4;
+	int keepTmp = 0;
 };
 
 class Input {

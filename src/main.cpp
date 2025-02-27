@@ -85,7 +85,8 @@ int main(int argc, char **argv) {
                 {"kmer-length", required_argument, 0, 'k'},
                 {"smer-length", required_argument, 0, 's'},
                 {"out-format", required_argument, 0, 'o'},
-				{"hashing-threads",required_argument, 0, 0},
+				{"hashing-threads", required_argument, 0, 0},
+				{"keep-temporary-files", no_argument, &userInput.keepTmp, 1},
                 
                 {"threads", required_argument, 0, 'j'},
                 {"verbose", no_argument, &verbose_flag, 1},
