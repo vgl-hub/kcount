@@ -207,7 +207,7 @@ int main(int argc, char **argv) {
                         printf("\t-j --threads <n> numbers of threads (default: max).\n");
                         printf("\t-o --out-format generates various kinds of outputs (currently supported: .hist .kc).\n");
 						printf("\t--hashing-threads number of hashing threads per buffer\n");
-						printf("\t--writing-threads number of threads used to consolidate maps\n");
+						printf("\t--writing-threads total number of threads used to consolidate maps\n");
                         printf("\t--verbose verbose output.\n");
                         printf("\t--cmd print $0 to stdout.\n");
                         exit(0);
