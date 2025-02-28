@@ -6,6 +6,7 @@ CXXFLAGS = -g -std=gnu++14 -O3 $(INCLUDE_DIR) $(WARNINGS)
 
 TARGET = kcount
 TEST_TARGET = validate
+NAIVE_TARGET = naive
 BUILD = build/bin
 SOURCE = src
 INCLUDE = include
@@ -27,7 +28,7 @@ debug: CXXFLAGS += -DDEBUG -DEBUG_SCAN
 debug: CCFLAGS += -DDEBUG -DEBUG_SCAN
 debug: head
 
-all: head validate
+all: head validate naive
 
 $(OBJS): %: $(BINDIR)/%
 	@
@@ -40,6 +41,9 @@ gfalibs:
 	
 validate: | $(BUILD)
 	$(CXX) $(CXXFLAGS) -o $(BUILD)/$(TARGET)-$(TEST_TARGET) $(SOURCE)/$(TEST_TARGET).cpp $(LIBS)
+	
+naive: gfalibs $(GFALIBS_DIR)/include/*.h | $(BUILD)
+	$(CXX) $(CXXFLAGS) -o $(BUILD)/$(TARGET)-$(NAIVE_TARGET) $(SOURCE)/$(NAIVE_TARGET).cpp $(GFALIBS_DIR)/*.o $(LIBS)
 	
 $(BUILD):
 	-mkdir -p $@

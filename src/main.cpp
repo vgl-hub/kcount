@@ -20,7 +20,7 @@
 #include "input.h"
 #include "main.h"
 
-std::string version = "0.1.0";
+std::string version = "0.0.1";
 
 //global
 std::chrono::high_resolution_clock::time_point start = std::chrono::high_resolution_clock::now(); // immediately start the clock when the program is run
