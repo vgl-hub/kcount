@@ -52,8 +52,11 @@ struct KmerCounter {
 		
 		std::vector<Sequence*> sequences = readBatch->sequences;
 		
-		for (Sequence* sequence : sequences)
-			appendSequence(sequence);
+		for (Sequence* sequence : sequences) {
+			std::cout<<"processing sequence: "<<sequence->header<<std::endl;
+			if (sequence->sequence->size() >= k)
+				appendSequence(sequence);
+		}
 		
 		for (auto pair : kmers) {
 			if (pair.second == 1)
@@ -64,11 +67,12 @@ struct KmerCounter {
 	void consolidate() {}
 	
 	void appendSequence(Sequence* sequence) {
-		std::cout<<"processing sequence: "<<sequence->header<<std::endl;
 		for (uint32_t i = 0; i < sequence->sequence->size()-k+1; ++i) {
 			std::string fw = sequence->sequence->substr(i, k);
 			std::string rc = revCom(sequence->sequence->substr(i, k));
-			++kmers[fw < rc ? fw : rc];
+			std::string canonical = fw < rc ? fw : rc;
+			std::cout<<canonical<<std::endl;
+			++kmers[canonical];
 			++total;
 		}
 	}
