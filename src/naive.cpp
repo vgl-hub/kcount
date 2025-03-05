@@ -71,7 +71,7 @@ struct KmerCounter {
 			std::string fw = sequence->sequence->substr(i, k);
 			std::string rc = revCom(sequence->sequence->substr(i, k));
 			std::string canonical = fw < rc ? fw : rc;
-			std::cout<<canonical<<std::endl;
+			//std::cout<<canonical<<std::endl;
 			++kmers[canonical];
 			++total;
 		}
