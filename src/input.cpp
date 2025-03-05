@@ -68,21 +68,6 @@ void Input::read() { // reads the actual input and performing the tasks
         case 0: { // reads input reads and generates the kmer db
             
             KDB kcount(userInput); // a new empty kmerdb with the specified kmer length
-            
-            if (userInput.inFiles.size() > 0) {
-                
-                lg.verbose("Loading input sequences");
-                unsigned int numFiles = userInput.inFiles.size();
-                
-                for (unsigned int i = 0; i < numFiles; ++i) // for each input read file
-                    loadKmers(userInput, kcount, 'r', i); // specialized function to process reads into kmers as hashes
-                
-                lg.verbose("Reads loaded.");
-                kcount.finalize();
-            }else{
-                fprintf(stderr, "Reads not provided. Exiting.\n");
-                exit(EXIT_FAILURE);
-            }
             kcount.report(); // output
             kcount.cleanup(); // delete tmp files
             break;
