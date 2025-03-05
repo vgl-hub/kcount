@@ -53,7 +53,7 @@ struct KmerCounter {
 		std::vector<Sequence*> sequences = readBatch->sequences;
 		
 		for (Sequence* sequence : sequences) {
-			std::cout<<"processing sequence: "<<sequence->header<<std::endl;
+			//std::cout<<"processing sequence: "<<sequence->header<<std::endl;
 			if (sequence->sequence->size() >= k)
 				appendSequence(sequence);
 		}
