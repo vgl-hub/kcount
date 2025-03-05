@@ -2,7 +2,7 @@
 #define INPUT_H
 
 struct UserInputKcount : UserInput {
-	uint32_t hashThreads = 7, writeThreads = 1; // small prime number
+	uint32_t hashThreads = 7, writeThreads = 4; // small prime number, max
 	int keepTmp = 0;
 };
 
