@@ -72,10 +72,10 @@ void Input::read(short unsigned int mode) { // reads the actual input and perfor
             
             KDB kcount(userInput); // a new empty kmerdb with the specified kmer length
             
-            if (userInput.inReads.size() > 0) {
+            if (userInput.inFiles.size() > 0) {
                 
                 lg.verbose("Loading input sequences");
-                unsigned int numFiles = userInput.inReads.size();
+                unsigned int numFiles = userInput.inFiles.size();
                 
                 for (unsigned int i = 0; i < numFiles; ++i) // for each input read file
                     loadKmers(userInput, kcount, 'r', i); // specialized function to process reads into kmers as hashes

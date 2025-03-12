@@ -129,7 +129,7 @@ int main(int argc, char **argv) {
                         for( ;optind < argc && *argv[optind] != '-' && !isInt(argv[optind]); optind++){
                             
                             ifFileExists(argv[optind]);
-                            userInput.inReads.push_back(argv[optind]);
+                            userInput.inFiles.push_back(argv[optind]);
                         }
                     }
                     break;
@@ -157,7 +157,7 @@ int main(int argc, char **argv) {
             
         }
         
-        if (userInput.inReads.size() == 0) {
+        if (userInput.inFiles.size() == 0) {
             fprintf(stderr, "At least one input file required (-f).\n");
             return EXIT_FAILURE;
         }
