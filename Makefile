@@ -2,7 +2,7 @@ CXX = g++
 INCLUDE_DIR = -I./include -Igfalibs/include
 WARNINGS = -Wall -Wextra
 
-CXXFLAGS = -g -std=gnu++14 -O3 $(INCLUDE_DIR) $(WARNINGS)
+CXXFLAGS = -g -std=gnu++14 -O3 $(INCLUDE_DIR) $(WARNINGS) $(CFLAGS)
 
 TARGET = kcount
 TEST_TARGET = validate
@@ -13,7 +13,7 @@ INCLUDE = include
 BINDIR := $(BUILD)/.o
 
 LIBS = -lz -lhts
-LDFLAGS := -pthread
+LDFLAGS += -pthread
 
 #gfalibs
 GFALIBS_DIR := $(CURDIR)/gfalibs
