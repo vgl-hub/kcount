@@ -1,5 +1,5 @@
-CXX = g++
-INCLUDE_DIR = -I./include -Igfalibs/include
+CXX ?= g++
+INCLUDE_DIR += -I./include -I./gfalibs/include
 WARNINGS = -Wall -Wextra
 
 CXXFLAGS += -g -std=gnu++14 -O3 $(INCLUDE_DIR) $(WARNINGS) $(CFLAGS)
@@ -32,15 +32,15 @@ all: head validate naive
 
 $(OBJS): %: $(BINDIR)/%
 	@
-$(BINDIR)%: $(SOURCE)/%.cpp $(INCLUDE)/%.h $(GFALIBS_DIR)/include/*.h $(GFALIBS_DIR)/src/MinScan.cpp Makefile | $(BINDIR)
-	$(CXX) $(CXXFLAGS) $(CCFLAGS) $(LDFLAGS) -c $< -o $@
+$(BINDIR)%: $(SOURCE)/%.cpp $(INCLUDE)/%.h $(GFALIBS_DIR)/include/*.h $(GFALIBS_DIR)/src/MinScan.cpp | $(BINDIR)
+	$(CXX) $(CXXFLAGS) -c $(SOURCE)/$(notdir $@).cpp -o $@
 
 .PHONY: gfalibs
 gfalibs: 
-	$(MAKE) -j -C $(GFALIBS_DIR) CXXFLAGS="$(CXXFLAGS)" CCFLAGS="$(CCFLAGS)"
+	$(MAKE) -j -C $(GFALIBS_DIR)
 	
 validate: | $(BUILD)
-	$(CXX) $(CXXFLAGS) -o $(BUILD)/$(TARGET)-$(TEST_TARGET) $(SOURCE)/$(TEST_TARGET).cpp $(LIBS)
+	$(CXX) $(CXXFLAGS) -o $(BUILD)/$(TARGET)-$(TEST_TARGET) $(SOURCE)/$(TEST_TARGET).cpp
 	
 naive: gfalibs $(GFALIBS_DIR)/include/*.h | $(BUILD)
 	$(CXX) $(CXXFLAGS) -o $(BUILD)/$(TARGET)-$(NAIVE_TARGET) $(SOURCE)/$(NAIVE_TARGET).cpp $(GFALIBS_DIR)/*.o $(LIBS)
