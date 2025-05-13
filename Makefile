@@ -43,7 +43,7 @@ validate: | $(BUILD)
 	$(CXX) $(CXXFLAGS) -o $(BUILD)/$(TARGET)-$(TEST_TARGET) $(SOURCE)/$(TEST_TARGET).cpp
 	
 naive: gfalibs $(GFALIBS_DIR)/include/*.h | $(BUILD)
-	$(CXX) $(CXXFLAGS) -o $(BUILD)/$(TARGET)-$(NAIVE_TARGET) $(SOURCE)/$(NAIVE_TARGET).cpp $(GFALIBS_DIR)/*.o $(LIBS)
+	$(CXX) $(CXXFLAGS) -o $(BUILD)/$(TARGET)-$(NAIVE_TARGET) $(SOURCE)/$(NAIVE_TARGET).cpp $(GFALIBS_DIR)/*.o
 	
 $(BUILD):
 	-mkdir -p $@
