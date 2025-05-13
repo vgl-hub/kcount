@@ -12,7 +12,7 @@ SOURCE = src
 INCLUDE = include
 BINDIR := $(BUILD)/.o
 
-LIBS = -lz
+LIBS = -lz -lhts
 LDFLAGS := -pthread
 
 #gfalibs

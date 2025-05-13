@@ -369,8 +369,10 @@ int main(int argc, char **argv) {
                         
                     case 0: // case for long options without short options
                         
-                        //                if (strcmp(long_options[option_index].name,"line-length") == 0)
-                        //                  splitLength = atoi(optarg);
+						if(strcmp(long_options[option_index].name,"decompression-threads") == 0)
+							userInput.decompression_threads = atoi(optarg);
+						if(strcmp(long_options[option_index].name,"compression-threads") == 0)
+							userInput.compression_threads = atoi(optarg);
                         
                         break;
                     case '?': // unrecognized option
