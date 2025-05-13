@@ -29,10 +29,10 @@ jobs:
         brew install htslib
         HTSLIB_PREFIX=$(brew --prefix htslib)
 
-        INCLUDE_DIR="-I$HTSLIB_PREFIX/include"
-        LDFLAGS="-L$HTSLIB_PREFIX/lib"
+        export CXXFLAGS="-I$HTSLIB_PREFIX/include $CXXFLAGS"
+        export LDFLAGS="-L$HTSLIB_PREFIX/lib $LDFLAGS"
 
-        make CFLAGS="$INCLUDE_DIR" LDFLAGS="$LDFLAGS" all -j
+        make all -j
     - if: matrix.os == 'ubuntu-latest'
       name: Build
       run: |
