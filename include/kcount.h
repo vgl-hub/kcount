@@ -16,11 +16,13 @@ public:
 #define BUFFER_RESERVE_SIZE 2097152 // 2MB preallocation for efficiency
 template<class DERIVED, class INPUT, typename KEY, typename TYPE1, typename TYPE2>
 void Kmap<DERIVED, INPUT, KEY, TYPE1, TYPE2>::initBuffering() {
-	
-	Init_Genes_Package(k, sLen);
+
+	Distribution_Bundle* bundle;
+	bool training = sLen ? false : true;
+
+	lg.verbose("Input smer length: " + std::to_string(sLen));
 	std::string kmerBatch;
 	kmerBatch.reserve(BUFFER_RESERVE_SIZE); // Preallocate memory for efficiency
-	Distribution_Bundle* bundle = Begin_Distribution(bufferFiles);
 	
 	uint32_t batchSize = 10000000; // number of bases processed by a thread
 	htsThreadPool tpool_read; // htslib threadpool pointer
@@ -76,6 +78,7 @@ void Kmap<DERIVED, INPUT, KEY, TYPE1, TYPE2>::initBuffering() {
 					
 					uint32_t len = bamdata->core.l_qseq; // length of the read
 					totalKmers += len;
+					totalKmers += len - k + 1;
 					uint8_t *seq = bam_get_seq(bamdata); // seq string
 					
 					inSequence.clear();
@@ -88,6 +91,13 @@ void Kmap<DERIVED, INPUT, KEY, TYPE1, TYPE2>::initBuffering() {
 					processedLength += inSequence.size();
 					
 					if (processedLength > batchSize) {
+						
+						if (training) {
+							sLen = Train_Genes_Package(k,mapCount,const_cast<char*>(kmerBatch.data()), kmerBatch.size());
+							bundle = Begin_Distribution(bufferFiles);
+							training = false;
+						}
+						
 						lg.verbose("Processing batch N: " + std::to_string(batchN++));
 						lg.verbose("Found " + std::to_string(totalKmers) + " total kmers (extracted from " + std::to_string(compressed_bytes_read) + " bytes)");
 						Distribute_Sequence(const_cast<char*>(kmerBatch.data()), kmerBatch.size(), bundle);
@@ -95,6 +105,14 @@ void Kmap<DERIVED, INPUT, KEY, TYPE1, TYPE2>::initBuffering() {
 						kmerBatch.clear();
 					}
 				}
+				
+				if (training) {
+					sLen = Train_Genes_Package(k,mapCount,const_cast<char*>(kmerBatch.data()), kmerBatch.size());
+					lg.verbose("Optimized smer length: " + std::to_string(sLen));
+					bundle = Begin_Distribution(bufferFiles);
+					training = false;
+				}
+				
 				lg.verbose("Processing batch N: " + std::to_string(batchN++));
 				lg.verbose("Found " + std::to_string(totalKmers) + " total kmers (extracted from " + std::to_string(compressed_bytes_read) + " bytes)");
 				Distribute_Sequence(const_cast<char*>(kmerBatch.data()), kmerBatch.size(), bundle);
