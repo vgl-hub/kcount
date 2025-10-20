@@ -11,24 +11,34 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: macos-13
+          - os: macos-latest
             command: ".github/workflows/val.sh"
           - os: ubuntu-latest
             command: ".github/workflows/val.sh"
             chmod: true
-          - os: windows-2019
-            command: ".github/workflows/val.bat"
       fail-fast: false
     runs-on: ${{ matrix.os }}
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
       with:
-            submodules: true
-    - name: Build
-      run: make all -j
+            submodules: recursive
+    - if: matrix.os == 'macos-latest'
+      name: Build (macOS)
+      run: |
+        brew install htslib
+        HTSLIB_PREFIX=$(brew --prefix htslib)
+
+        export CXXFLAGS="-I$HTSLIB_PREFIX/include $CXXFLAGS"
+        export LDFLAGS="-L$HTSLIB_PREFIX/lib $LDFLAGS"
+
+        make all -j
+    - if: matrix.os == 'ubuntu-latest'
+      name: Build
+      run: |
+        sudo apt-get install libhts-dev
+        make all -j
     - name: Validate
       run: |
         chmod +x .github/workflows/val.sh
         ${{ matrix.command }}
-
